@@ -23,6 +23,8 @@ class AuthorizationServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->bootConfig();
+        // Register commands
+        $this->commands('command.authorization.migration');
     }
 
     /**
@@ -32,6 +34,10 @@ class AuthorizationServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton('command.authorization.migration', function ($app) {
+            return new MigrationCommand();
+        });
+
     }
 
     /**
@@ -45,14 +51,6 @@ class AuthorizationServiceProvider extends ServiceProvider
     }
 
     /**
-     * Add middleware auto save to application
-     * @param $middleware
-     */
-    protected function registerMiddleware($save)
-    {
-    }
-
-    /**
      * Get the services provided by the provider.
      *
      * @return array
@@ -62,10 +60,4 @@ class AuthorizationServiceProvider extends ServiceProvider
         return array('authorization');
     }
 
-    /**
-     * @param $alias boolean
-     */
-    private function registerAlias($alias)
-    {
-    }
 }
