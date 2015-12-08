@@ -1,0 +1,30 @@
+{
+  "name": "buzz/laravel-advanced-authorization",
+  "description": "Package for handling advanced authorization (role and permission) in Laravel 5.*",
+  "keywords": [
+    "laravel",
+    "advanced",
+    "authorization",
+    "role",
+    "permission"
+  ],
+  "homepage": "https://github.com/thinhbuzz/laravel-advanced-authorization",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "ThinhBuzz",
+      "email": "mr.thinhbuzz@gmail.com",
+      "homepage": "https://www.facebook.com/thinh.buzz"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "illuminate/support": "5.0.*|5.1.*",
+    "illuminate/contracts": "5.0.*|5.1.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Buzz\\Authorization\\": "src/"
+    }
+  }
+}
