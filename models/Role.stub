@@ -1,0 +1,12 @@
+<?php
+
+
+namespace %s;
+
+
+use Illuminate\Database\Eloquent\Model;
+
+class %s extends Model
+{
+    public $table = 'roles';
+}

@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class MigrationCommand extends Command
 {
-    protected $packageTables = ['roles', 'permissons', 'permission_role', 'role_user'];
+    protected $packageTables = ['roles', 'permissions', 'permission_role', 'role_user'];
     /**
      * The name and signature of the console command.
      *
@@ -48,15 +48,22 @@ class MigrationCommand extends Command
      * */
     private function publishMigration()
     {
-        $migrationPath = realpath(__DIR__ . sprintf('%s..%smigrations', DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR)) . DIRECTORY_SEPARATOR;
-        $outputPath = base_path(sprintf('database%smigrations%s', DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR));
+        $migrationPath = realpath(__DIR__ . '/../migrations') . DIRECTORY_SEPARATOR;
+        $outputPath = realpath(base_path('database/migrations'));
+        if ($outputPath === false) {
+            $this->line('');
+            $this->error('Directory database/migrations not exist');
+
+            return;
+        }
         foreach ($this->packageTables as $table) {
-            $tmpPath = $outputPath;
+            $tmpPath = $outputPath . DIRECTORY_SEPARATOR;
             $tmpPath .= sprintf('%s_create_%s_table.php', date('Y_m_d_His'), $table);
             file_put_contents($tmpPath,
-                file_get_contents(sprintf('%s/create_%s_table.php', $migrationPath, $table))
+                file_get_contents(realpath(sprintf('%s/create_%s_table.php', $migrationPath, $table)))
             );
             $this->info(sprintf('Created migration table: %s', $table));
+            sleep(1);
         }
     }
 }

@@ -1,0 +1,73 @@
+<?php
+
+use Illuminate\Database\Seeder;
+use %n_role%;
+use %n_permission%;
+
+class AuthorizationSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        /*
+         * Seed permissions
+         * */
+        %permission%::create([
+            'name' => 'Create posts',
+            'slug' => 'post.create'
+        ]);
+        %permission%::create([
+            'name' => 'Modify posts',
+            'slug' => 'post.modify'
+        ]);
+        %permission%::create([
+            'name' => 'Trash posts',
+            'slug' => 'post.trash'
+        ]);
+        %permission%::create([
+            'name' => 'Delete posts',
+            'slug' => 'post.delete'
+        ]);
+        %permission%::create([
+            'name' => 'Create users',
+            'slug' => 'user.create'
+        ]);
+        %permission%::create([
+            'name' => 'Modify users',
+            'slug' => 'user.modify'
+        ]);
+        %permission%::create([
+            'name' => 'Trash users',
+            'slug' => 'user.trash'
+        ]);
+        %permission%::create([
+            'name' => 'Delete users',
+            'slug' => 'user.delete'
+        ]);
+        /*
+         * Seed roles
+         * */
+        $role = %role%::create([
+            'name' => 'Admin',
+            'slug' => 'admin',
+            'level' => 1,
+        ]);
+        $role->attachPermission([1,2,3,4,5,6,7,8]);
+        $role = %role%::create([
+            'name' => 'Poster',
+            'slug' => 'poster',
+            'level' => 2,
+        ]);
+        $role->attachPermission([1,2,3]);
+        $role = %role%::create([
+            'name' => 'New Registered Users',
+            'slug' => 'registered.user',
+            'level' => 3,
+        ]);
+        $role->attachPermission([1,2]);
+    }
+}
