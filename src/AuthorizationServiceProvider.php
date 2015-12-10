@@ -23,6 +23,7 @@ class AuthorizationServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->bootConfig();
+        $this->registerAlias();
     }
 
     /**
@@ -32,6 +33,9 @@ class AuthorizationServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton('authorization', function ($app) {
+            return new Authorization();
+        });
     }
 
     /**
@@ -51,7 +55,16 @@ class AuthorizationServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('authorization');
+        return ['authorization'];
+    }
+
+    private function registerAlias()
+    {
+        $config = $this->app->config->get('authorization');
+        if ($config['auto_alias'] === true) {
+            $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+            $loader->alias($config['alias'], AuthorizationFacade::class);
+        }
     }
 
 }

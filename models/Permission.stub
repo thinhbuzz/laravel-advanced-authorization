@@ -4,9 +4,11 @@
 namespace App;
 
 
+use Buzz\Authorization\Traits\PermissionAuthorizationTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class Permission extends Model
 {
+    use PermissionAuthorizationTrait;
     public $table = 'permissions';
 }
