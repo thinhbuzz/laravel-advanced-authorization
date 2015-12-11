@@ -29,16 +29,16 @@ trait RoleAuthorizationTrait
 
     public function detachPermission($permission)
     {
-        $this->users()->detach($permission);
+        $this->permissions()->detach($permission);
     }
 
     public function attachPermission($permission)
     {
-        $this->users()->attach($permission);
+        $this->permissions()->attach($permission);
     }
 
     public function syncPermission($permission)
     {
-        $this->users()->sync($permission);
+        $this->permissions()->sync($permission);
     }
 }

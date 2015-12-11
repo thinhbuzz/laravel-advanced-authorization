@@ -9,11 +9,17 @@ use Illuminate\Database\Eloquent\Model;
 trait UserAuthorizationTrait
 {
     /**
-     * The permission of user.
+     * The permissions of user.
      *
      * @var \Illuminate\Support\Collection
      */
-    protected $permissions;
+    public $permissions;
+    /**
+     * The levels of user.
+     *
+     * @var \Illuminate\Support\Collection
+     */
+    public $levels;
 
     /**
      * The roles that belong to the user.
@@ -69,11 +75,7 @@ trait UserAuthorizationTrait
     public function can($permission, $any = false)
     {
         if (is_null($this->permissions)) {
-            $permissions = collect();
-            $this->roles->each(function ($item, $key) use (&$permissions) {
-                $permissions = $permissions->merge($item->permissions->lists('slug'));
-            });
-            $this->permissions = $permissions->unique();
+            $this->loadPermissions();
         }
         if ($permission instanceof Model) {
             $permission = $permission->slug;
@@ -96,5 +98,14 @@ trait UserAuthorizationTrait
     public function canAny($permission)
     {
         return $this->can($permission, true);
+    }
+
+    protected function loadPermissions()
+    {
+        $permissions = collect();
+        $this->roles->each(function ($item, $key) use (&$permissions) {
+            $permissions = $permissions->merge($item->permissions->lists('slug'));
+        });
+        $this->permissions = $permissions->unique();
     }
 }

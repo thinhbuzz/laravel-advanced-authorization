@@ -27,9 +27,11 @@ class UtilitieServiceProvider extends ServiceProvider
         // Register commands
         $this->commands([
             'command.authorization.model',
-            'command.authorization.migration',
             'command.authorization.seeder'
         ]);
+        $this->publishes([
+            realpath(__DIR__ . '/../migrations/') => base_path('/database/migrations')
+        ], 'migrations');
     }
 
     /**
@@ -41,10 +43,6 @@ class UtilitieServiceProvider extends ServiceProvider
     {
         $this->app->singleton('command.authorization.model', function ($app) {
             return new ModelCommand();
-        });
-
-        $this->app->singleton('command.authorization.migration', function ($app) {
-            return new MigrationCommand();
         });
 
         $this->app->singleton('command.authorization.seeder', function ($app) {
