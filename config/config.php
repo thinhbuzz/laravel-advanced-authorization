@@ -6,6 +6,9 @@ return [
     'model_user' => \App\User::class,
     'auto_alias' => true,
     'alias' => 'Authorization',
-    'eager_type' => 1,
-    'blade_shortcut' => true
+    'blade_shortcut' => true,
+    'user_level' => true,
+    'role_exception' => \Buzz\Authorization\Exception\RoleDeniedException::class,
+    'permission_exception' => \Buzz\Authorization\Exception\PermissionDeniedException::class,
+    'level_exception' => \Buzz\Authorization\Exception\LevelDeniedException::class,
 ];

@@ -6,6 +6,13 @@ namespace Buzz\Authorization\Traits;
 
 trait UserLevelTrait
 {
+    /**
+     * The levels of user.
+     *
+     * @var \Illuminate\Support\Collection
+     */
+    public $levels;
+
     public function level()
     {
         return $this->getLevel('max');

@@ -5,6 +5,7 @@ namespace Buzz\Authorization\Traits;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 trait UserAuthorizationTrait
 {
@@ -14,12 +15,6 @@ trait UserAuthorizationTrait
      * @var \Illuminate\Support\Collection
      */
     public $permissions;
-    /**
-     * The levels of user.
-     *
-     * @var \Illuminate\Support\Collection
-     */
-    public $levels;
 
     /**
      * The roles that belong to the user.
@@ -74,9 +69,7 @@ trait UserAuthorizationTrait
 
     public function can($permission, $any = false)
     {
-        if (is_null($this->permissions)) {
-            $this->loadPermissions();
-        }
+        $this->loadPermissions();
         if ($permission instanceof Model) {
             $permission = $permission->slug;
         }
@@ -102,10 +95,17 @@ trait UserAuthorizationTrait
 
     protected function loadPermissions()
     {
-        $permissions = collect();
-        $this->roles->each(function ($item, $key) use (&$permissions) {
-            $permissions = $permissions->merge($item->permissions->lists('slug'));
-        });
-        $this->permissions = $permissions->unique();
+        if (is_null($this->permissions)) {
+            if (!is_null($this->roles)) {
+                $this->roles->load('permissions');
+            } else {
+                $this->load(['roles.permissions']);
+            }
+            $permissions = new Collection();
+            $this->roles->each(function ($item, $key) use (&$permissions) {
+                $permissions = $permissions->merge($item->permissions->lists('slug'));
+            });
+            $this->permissions = $permissions->unique();
+        }
     }
 }

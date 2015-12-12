@@ -4,7 +4,6 @@
 namespace Buzz\Authorization;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\View\Compilers\BladeCompiler;
 
 class AuthorizationServiceProvider extends ServiceProvider
 {
@@ -71,8 +70,12 @@ class AuthorizationServiceProvider extends ServiceProvider
 
     protected function registerBladeShortcut()
     {
-        if ($this->app->config->get('authorization.blade_shortcut') === true) {
+        $config = $this->app->config->get('authorization.blade_shortcut');
+        if ($config['blade_shortcut'] === true) {
             $blade = $this->app['view']->getEngineResolver()->resolve('blade')->getCompiler();
+            /*
+             * Blade shortcut fot authorization
+             * */
             $blade->directive('role', function ($expression) {
                 return "<?php if(app('authorization')->is{$expression}): ?>";
             });
@@ -84,17 +87,6 @@ class AuthorizationServiceProvider extends ServiceProvider
             });
             $blade->directive('anyPermission', function ($expression) {
                 return "<?php if(app('authorization')->canAny{$expression}): ?>";
-            });
-            $blade->directive('thanLevel', function ($expression) {
-                return "<?php if(app('authorization')->level() > {$expression}): ?>";
-            });
-            $blade->directive('lessLevel', function ($expression) {
-                return "<?php if(app('authorization')->level() < {$expression}): ?>";
-            });
-            $blade->directive('betweenLevel', function ($expression) {
-                list($min, $max) = explode(',',str_replace(['(',')',' '], '', $expression));
-
-                return "<?php if(app('authorization')->level() >= {$min} && app('authorization')->level() <= {$max}): ?>";
             });
 
             $blade->directive('endRole', function ($expression) {
@@ -109,15 +101,43 @@ class AuthorizationServiceProvider extends ServiceProvider
             $blade->directive('endAnyPermission', function ($expression) {
                 return "<?php endif; ?>";
             });
-            $blade->directive('endThanLevel', function ($expression) {
-                return "<?php endif; ?>";
-            });
-            $blade->directive('endLessLevel', function ($expression) {
-                return "<?php endif; ?>";
-            });
-            $blade->directive('endBetweenLevel', function ($expression) {
-                return "<?php endif; ?>";
-            });
+            /*
+             * Blade shortcut for user level
+             * */
+            if ($config['user_level'] === true) {
+                $blade->directive('thanLevel', function ($expression) {
+                    return "<?php if(app('authorization')->level() > {$expression}): ?>";
+                });
+                $blade->directive('lessLevel', function ($expression) {
+                    return "<?php if(app('authorization')->level() < {$expression}): ?>";
+                });
+                $blade->directive('betweenLevel', function ($expression) {
+                    list($min, $max) = explode(',', str_replace(['(', ')', ' '], '', $expression));
+
+                    return "<?php if(app('authorization')->level() >= {$min} && app('authorization')->level() <= {$max}): ?>";
+                });
+                $blade->directive('matchLevel', function ($expression) {
+                    return "<?php if(app('authorization')->matchLevel{$expression}): ?>";
+                });
+                $blade->directive('matchAnyLevel', function ($expression) {
+                    return "<?php if(app('authorization')->matchAnyLevel{$expression}): ?>";
+                });
+                $blade->directive('endThanLevel', function ($expression) {
+                    return "<?php endif; ?>";
+                });
+                $blade->directive('endLessLevel', function ($expression) {
+                    return "<?php endif; ?>";
+                });
+                $blade->directive('endBetweenLevel', function ($expression) {
+                    return "<?php endif; ?>";
+                });
+                $blade->directive('endMatchLevel', function ($expression) {
+                    return "<?php endif; ?>";
+                });
+                $blade->directive('endMatchAnyLevel', function ($expression) {
+                    return "<?php endif; ?>";
+                });
+            }
         }
     }
 
