@@ -26,21 +26,34 @@ trait UserAuthorizationTrait
         return $this->belongsToMany(\Config::get('authorization.model_role'));
     }
 
-    public function detachRole($role)
+    /**
+     * Remove roles from users
+     *
+     * @param string|array $roles
+     * @return int
+     */
+    public function detachRole($roles)
     {
-        $this->roles()->detach($role);
+        return $this->roles()->detach($roles);
     }
 
-    public function attachRole($role)
+    /**
+     * Append new roles to user
+     *
+     * @param string|array $role
+     */
+    public function attachRole($roles)
     {
-        $this->roles()->attach($role);
+        $this->roles()->attach($roles);
     }
 
-    public function syncRole($role)
-    {
-        $this->roles()->sync($role);
-    }
-
+    /**
+     * Return true if user has all roles
+     *
+     * @param string|array $role
+     * @param bool $any
+     * @return bool
+     */
     public function is($role, $any = false)
     {
         if ($role instanceof Model) {
@@ -62,6 +75,12 @@ trait UserAuthorizationTrait
         return $slugs->search($role) !== false;
     }
 
+    /**
+     * Return true if user has one in any roles
+     *
+     * @param string|array $role
+     * @return bool
+     */
     public function isAny($role)
     {
         return $this->is($role, true);

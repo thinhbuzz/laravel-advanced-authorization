@@ -59,5 +59,4 @@ class UtilitieServiceProvider extends ServiceProvider
     {
         return ['authorization'];
     }
-
 }

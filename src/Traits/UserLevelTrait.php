@@ -13,21 +13,37 @@ trait UserLevelTrait
      */
     public $levels;
 
+    /**
+     * @return int|null
+     */
     public function level()
     {
         return $this->getLevel('max');
     }
 
+    /**
+     * @return int|null
+     */
     public function minLevel()
     {
         return $this->getLevel('min');
     }
 
+    /**
+     * @return array
+     */
     public function allLevel()
     {
         return $this->getLevel('all');
     }
 
+    /**
+     * Return true if user has all levels
+     *
+     * @param $level
+     * @param bool $any
+     * @return bool
+     */
     public function matchLevel($level, $any = false)
     {
         if (is_array($level)) {
@@ -45,6 +61,12 @@ trait UserLevelTrait
         return $this->getLevel('contains', $level);
     }
 
+    /**
+     * Return true if user has one in any levels
+     *
+     * @param $levels
+     * @return bool
+     */
     public function matchAnyLevel($levels)
     {
         return $this->matchLevel($levels, true);

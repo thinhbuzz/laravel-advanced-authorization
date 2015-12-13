@@ -20,7 +20,7 @@ class SeedCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Publish seeder for package.';
+    protected $description = 'Publish seeder for Authorization package.';
 
     /**
      * Create a new command instance.
@@ -64,5 +64,4 @@ class SeedCommand extends Command
             }
         }
     }
-
 }

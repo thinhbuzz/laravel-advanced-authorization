@@ -3,10 +3,14 @@
   "description": "Package for handling advanced authorization (role and permission) in Laravel 5.*",
   "keywords": [
     "laravel",
+    "laravel5",
     "advanced",
     "authorization",
+    "roles",
     "role",
-    "permission"
+    "permissions",
+    "permission",
+    "acl"
   ],
   "homepage": "https://github.com/thinhbuzz/laravel-advanced-authorization",
   "license": "MIT",

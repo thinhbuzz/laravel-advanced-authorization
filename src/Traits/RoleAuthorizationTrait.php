@@ -27,18 +27,27 @@ trait RoleAuthorizationTrait
         return $this->belongsToMany(\Config::get('authorization.model_user'));
     }
 
-    public function detachPermission($permission)
+    /**
+     * @param $permissions
+     */
+    public function detachPermission($permissions)
     {
-        $this->permissions()->detach($permission);
+        $this->permissions()->detach($permissions);
     }
 
-    public function attachPermission($permission)
+    /**
+     * @param $permissions
+     */
+    public function attachPermission($permissions)
     {
-        $this->permissions()->attach($permission);
+        $this->permissions()->attach($permissions);
     }
 
-    public function syncPermission($permission)
+    /**
+     * @param $permissions
+     */
+    public function syncPermission($permissions)
     {
-        $this->permissions()->sync($permission);
+        $this->permissions()->sync($permissions);
     }
 }

@@ -20,7 +20,7 @@ class ModelCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Publish models for package.';
+    protected $description = 'Publish models for Authorization package.';
 
     /**
      * Execute the console command.

@@ -39,30 +39,34 @@ class LevelMiddleware
      */
     public function handle($request, Closure $next, $level)
     {
-        dd($level);
         $levelException = $this->config->get('authorization.level_exception');
         $userLevel = app('authorization')->level();
+        /*Check: number <= user level <= number*/
         if (strpos('<=>', $level) !== false) {
             $middLevel = explode('<=>', $level);
             if ($userLevel < intval($middLevel[0]) || $userLevel > intval($middLevel[1])) {
                 throw new $levelException();
             }
         }
+        /*Check: user level < number*/
         if (strpos('<', $level) !== false) {
             if ($userLevel >= intval(substr($level, 1))) {
                 throw new $levelException();
             }
         }
+        /*Check: user level < number*/
         if (strpos('>', $level) !== false) {
             if ($userLevel <= intval(substr($level, 1))) {
                 throw new $levelException();
             }
         }
+        /*Check: user has all levels*/
         if (strpos('&', $level) !== false) {
             if (app('authorization')->matchLevel(explode('&', $level)) === false) {
                 throw new $levelException();
             }
         }
+        /*Check user has one in any levels*/
         if (strpos('|', $level) !== false) {
             if (app('authorization')->matchAnyLevel(explode('|', $level)) === false) {
                 throw new $levelException();
