@@ -70,7 +70,7 @@ class AuthorizationServiceProvider extends ServiceProvider
 
     protected function registerBladeShortcut()
     {
-        $config = $this->app->config->get('authorization.blade_shortcut');
+        $config = $this->app->config->get('authorization');
         if ($config['blade_shortcut'] === true) {
             $blade = $this->app['view']->getEngineResolver()->resolve('blade')->getCompiler();
             /*

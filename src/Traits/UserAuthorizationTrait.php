@@ -67,6 +67,13 @@ trait UserAuthorizationTrait
         return $this->is($role, true);
     }
 
+    /**
+     * Return true if user has all permissions
+     *
+     * @param string|array $permission
+     * @param bool $any
+     * @return bool
+     */
     public function can($permission, $any = false)
     {
         $this->loadPermissions();
@@ -88,16 +95,29 @@ trait UserAuthorizationTrait
         return $this->permissions->search($permission) !== false;
     }
 
-    public function canAny($permission)
+    /**
+     * Return true if user has one in any permissions
+     *
+     * @param string|array $permission
+     * @return bool
+     */
+    public function canAny($permissions)
     {
-        return $this->can($permission, true);
+        return $this->can($permissions, true);
     }
 
+    /**
+     * Load permissions of user if not exist
+     *
+     * @return void
+     */
     protected function loadPermissions()
     {
         if (is_null($this->permissions)) {
             if (!is_null($this->roles)) {
-                $this->roles->load('permissions');
+                if (is_null($this->roles->first()->permissions)) {
+                    $this->roles->load('permissions');
+                }
             } else {
                 $this->load(['roles.permissions']);
             }
