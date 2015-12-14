@@ -22,7 +22,6 @@ class AuthorizationServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->bootConfig();
         $this->registerAlias();
         $this->registerBladeShortcut();
     }
@@ -37,16 +36,6 @@ class AuthorizationServiceProvider extends ServiceProvider
         $this->app->singleton('authorization', function ($app) {
             return new Authorization($app);
         });
-    }
-
-    /**
-     * Set config file for package
-     */
-    protected function bootConfig()
-    {
-        $path = __DIR__ . '/../config/config.php';
-        $this->publishes([$path => config_path('authorization.php')], 'config');
-        $this->mergeConfigFrom($path, 'authorization');
     }
 
     /**

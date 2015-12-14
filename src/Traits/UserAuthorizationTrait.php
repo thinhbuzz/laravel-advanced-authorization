@@ -134,7 +134,7 @@ trait UserAuthorizationTrait
     {
         if (is_null($this->permissions)) {
             if (!is_null($this->roles)) {
-                if (is_null($this->roles->first()->permissions)) {
+                if (is_object(($firstRole = $this->roles->first())) && is_null($firstRole->permissions)) {
                     $this->roles->load('permissions');
                 }
             } else {
