@@ -15,6 +15,18 @@ trait UserAuthorizationTrait
      * @var \Illuminate\Support\Collection
      */
     public $permissions;
+    /**
+     * The array slug permissions of user.
+     *
+     * @var \Illuminate\Support\Collection
+     */
+    public $slugPermissions;
+    /**
+     * The array slug roles of user.
+     *
+     * @var \Illuminate\Support\Collection
+     */
+    public $slugRoles;
 
     /**
      * The roles that belong to the user.
@@ -23,7 +35,7 @@ trait UserAuthorizationTrait
      */
     public function roles()
     {
-        return $this->belongsToMany(\Config::get('authorization.model_role'));
+        return $this->belongsToMany(app('config')->get('authorization.model_role'));
     }
 
     /**
@@ -32,7 +44,7 @@ trait UserAuthorizationTrait
      * @param string|array $roles
      * @return int
      */
-    public function detachRole($roles)
+    public function detachRole($roles = [])
     {
         return $this->roles()->detach($roles);
     }
@@ -56,13 +68,16 @@ trait UserAuthorizationTrait
      */
     public function is($role, $any = false)
     {
+        if (is_null($this->slugRoles)) {
+            $this->slugRoles = new Collection();
+            $this->slugRoles = $this->roles->lists('slug');
+        }
         if ($role instanceof Model) {
             $role = $role->slug;
         }
-        $slugs = $this->roles->lists('slug');
         if (is_array($role)) {
             foreach ($role as $item) {
-                if ($slugs->search($item) === false) {
+                if ($this->slugRoles->search($item) === false) {
                     return false;
                 } elseif ($any === true) {
                     return true;
@@ -72,7 +87,7 @@ trait UserAuthorizationTrait
             return true;
         }
 
-        return $slugs->search($role) !== false;
+        return $this->slugRoles->search($role) !== false;
     }
 
     /**
@@ -101,7 +116,7 @@ trait UserAuthorizationTrait
         }
         if (is_array($permission)) {
             foreach ($permission as $item) {
-                if ($this->permissions->search($item) === false) {
+                if ($this->slugPermissions->search($item) === false) {
                     return false;
                 } elseif ($any === true) {
                     return true;
@@ -111,7 +126,7 @@ trait UserAuthorizationTrait
             return true;
         }
 
-        return $this->permissions->search($permission) !== false;
+        return $this->slugPermissions->search($permission) !== false;
     }
 
     /**
@@ -126,25 +141,45 @@ trait UserAuthorizationTrait
     }
 
     /**
+     * Return permissions of user
+     *
+     * @return Collection
+     */
+    public function permissions()
+    {
+        $this->loadPermissions();
+
+        return $this->permissions;
+    }
+
+    /**
      * Load permissions of user if not exist
      *
      * @return void
      */
     protected function loadPermissions()
     {
-        if (is_null($this->permissions)) {
+        if (is_null($this->slugPermissions)) {
             if (!is_null($this->roles)) {
-                if (is_object(($firstRole = $this->roles->first())) && is_null($firstRole->permissions)) {
+                if (is_object(($firstRole = $this->roles->first())) && is_null($firstRole->slugPermissions)) {
                     $this->roles->load('permissions');
                 }
             } else {
                 $this->load(['roles.permissions']);
             }
+            $slugPermissions = new Collection();
             $permissions = new Collection();
-            $this->roles->each(function ($item, $key) use (&$permissions) {
-                $permissions = $permissions->merge($item->permissions->lists('slug'));
+            $this->roles->each(function ($item, $key) use (&$permissions, &$slugPermissions) {
+                $slugPermissions = $slugPermissions->merge($item->permissions->lists('slug'));
+                $item->permissions->each(function ($v, $k) use (&$permissions) {
+                    $tmpSlug = $permissions->lists('slug');
+                    if ($tmpSlug->search($v->slug) === false) {
+                        $permissions->push($v);
+                    }
+                });
             });
-            $this->permissions = $permissions->unique();
+            $this->permissions = $permissions;
+            $this->slugPermissions = $slugPermissions->unique();
         }
     }
 }

@@ -3,7 +3,7 @@
 > This package inspired by [zizaco/entrust](https://github.com/Zizaco/entrust) and [bican/roles](https://github.com/romanbican/roles).
 
 - [Installation](#installation)
-    - [Composer](#composer.json)
+    - [Composer](#composer)
     - [Provider](#provider)
     - [Alias](#alias)
     - [Middleware](#middleware)
@@ -12,6 +12,7 @@
     - [Config package](#config_package)
     - [Config model](#config_model)
 - [Instruction](#instruction)
+
 ## Installation
 ### Composer
 
@@ -159,5 +160,93 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
 ## Instruction
 ### Creating data
+##### Create Permission
+
+```php
+$permission = new \App\Permission();//depend "model_permission" config 
+$permission->name = 'Create posts';
+$permission->slug = 'post.create';// can use str_slug('Create posts', '.');
+$permission->save();
+```
 
 ##### Create Role
+
+```php
+$role = new \App\Role();//depend "model_role" config 
+$role->name = 'Admin';
+$role->slug = 'Admin';// can use str_slug('Create posts', '.');
+$role->save();
+```
+
+### Attach/ detach data
+#### Attach/ detach permissions
+
+```php
+//attach
+$role->attachPermission($permission);//input is object
+$role->attachPermission([$permission, $permission2, $permission3]);//input is array objects
+$role->attachPermission(1);//assume 1 is id of $permission
+$role->attachPermission([1,2,3]);//assume 1,2,3 is id of $permission, $permission2, $permission3
+
+//detach
+$role->detachPermission($permission);//input is object
+$role->detachPermission([$permission, $permission2, $permission3]);//input is array objects
+$role->detachPermission(1);//assume 1 is id of $permission
+$role->detachPermission([1,2,3]);//assume 1,2,3 is id of $permission, $permission2, $permission3
+$role->detachPermission([]);//detach all permissions
+```
+
+#### Attach/ detach roles
+
+```php
+$user = \App\User::find(1);//depend "model_user" config 
+//attach
+$role->attachRole($role);//input is object
+$role->attachRole([$role, $role2, $role3]);//input is array objects
+$role->attachRole(1);//assume 1 is id of $role
+$role->attachRole([1,2,3]);//assume 1,2,3 is id of $role, $role2, $role3
+
+//detach
+$role->detachRole($role);//input is object
+$role->detachRole([$role, $role2, $role3]);//input is array objects
+$role->detachRole(1);//assume 1 is id of $role
+$role->detachRole([1,2,3]);//assume 1,2,3 is id of $role, $role2, $role3
+$role->detachRole([]);//detach all roles
+```
+
+### Checking role/ permission
+> Always return ``false`` if ``Auth::check() === false``
+
+```php
+//someAction: is, isAny, can, canAny
+//check user with database
+$user = \App\User::find(1);
+$user->someAction
+//check current user login
+$user = \Auth::user();
+$user->someAction
+//or
+Authorization::someAction
+//or
+app('authorization')->someAction
+```
+Check has role or has all roles
+```php
+$user->is('admin');//admin is slug of role
+//OR
+$user->is(['admin', 'mod']);//['admin', 'mod'] is array slugs of role
+```
+Check has one in any roles
+```php
+$user->isAny(['admin', 'mod']);
+```
+Check has permission or has all permissions
+```php
+$user->can('post.create');//admin is slug of permission
+//OR
+$user->can(['post.create', 'post.delete']);//['admin', 'mod'] is array slugs of permission
+```
+Check has one in any permissions
+```php
+$user->canAny(['post.create', 'post.delete']);
+```

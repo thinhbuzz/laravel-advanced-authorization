@@ -14,6 +14,6 @@ trait PermissionAuthorizationTrait
      */
     public function roles()
     {
-        return $this->belongsToMany(\Config::get('authorization.model_role'));
+        return $this->belongsToMany(app('config')->get('authorization.model_role'));
     }
 }
