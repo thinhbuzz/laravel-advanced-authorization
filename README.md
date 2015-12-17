@@ -9,8 +9,8 @@
     - [Middleware](#middleware)
 - [Configuration](#configuration)
     - [Pubslish](#pubslish)
-    - [Config package](#config_package)
-    - [Config model](#config_model)
+    - [Config package](#config-package)
+    - [Config model](#config-model)
 - [Instruction](#instruction)
 
 ## Installation
@@ -217,6 +217,8 @@ $role->detachRole([]);//detach all roles
 ### Checking role/ permission
 > Always return ``false`` if ``Auth::check() === false``
 
+> All blade shortcuts available if config ``blade_shortcut`` is true
+
 ```php
 //someAction: is, isAny, can, canAny
 //check user with database
@@ -235,18 +237,49 @@ Check has role or has all roles
 $user->is('admin');//admin is slug of role
 //OR
 $user->is(['admin', 'mod']);//['admin', 'mod'] is array slugs of role
+//Blade
+@role('admin')
+    //your code
+@endRole
 ```
 Check has one in any roles
 ```php
 $user->isAny(['admin', 'mod']);
+//Blade
+@anyRole('admin')
+    //your code
+@endAnyRole
 ```
 Check has permission or has all permissions
 ```php
 $user->can('post.create');//admin is slug of permission
 //OR
 $user->can(['post.create', 'post.delete']);//['admin', 'mod'] is array slugs of permission
+//Blade
+@permission('post.create')
+    //your code
+@endPermission
 ```
 Check has one in any permissions
 ```php
 $user->canAny(['post.create', 'post.delete']);
+//Blade
+@anyPermission('post.create')
+    //your code
+@endAnyPermission
+```
+Check level (available if config ``user_level`` is true)
+```php
+@greaterLevel('3')// check smallest level of user > 3
+    //your code
+@endGreaterLevel
+@endLessLevel('3')// check smallest level of user < 3
+    //your code
+@endGreaterLevel
+@betweenLevel(3, 5)// check smallest level of user between 3 and 5
+    //your code
+@endBetweenLevel
+@matchAnyLevel([3,5])// check smallest level of user has in array [3,5]
+    //your code
+@endMatchAnyLevel
 ```

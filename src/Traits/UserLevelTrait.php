@@ -18,15 +18,15 @@ trait UserLevelTrait
      */
     public function level()
     {
-        return $this->getLevel('max');
+        return $this->getLevel('min');
     }
 
     /**
      * @return int|null
      */
-    public function minLevel()
+    public function maxLevel()
     {
-        return $this->getLevel('min');
+        return $this->getLevel('max');
     }
 
     /**

@@ -94,7 +94,7 @@ class AuthorizationServiceProvider extends ServiceProvider
              * Blade shortcut for user level
              * */
             if ($config['user_level'] === true) {
-                $blade->directive('thanLevel', function ($expression) {
+                $blade->directive('greaterLevel', function ($expression) {
                     return "<?php if(app('authorization')->level() > {$expression}): ?>";
                 });
                 $blade->directive('lessLevel', function ($expression) {
@@ -111,7 +111,7 @@ class AuthorizationServiceProvider extends ServiceProvider
                 $blade->directive('matchAnyLevel', function ($expression) {
                     return "<?php if(app('authorization')->matchAnyLevel{$expression}): ?>";
                 });
-                $blade->directive('endThanLevel', function ($expression) {
+                $blade->directive('endGreaterLevel', function ($expression) {
                     return "<?php endif; ?>";
                 });
                 $blade->directive('endLessLevel', function ($expression) {
