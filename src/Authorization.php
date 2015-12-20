@@ -54,13 +54,13 @@ class Authorization
     {
         if (method_exists($this, $name) === false) {
             if ($this->isLogin === true) {
-                return $this->user->{$name}($arguments);
+                return call_user_func_array([$this->user, $name], $arguments);
             }
 
             return false;
         }
 
-        return $this->{$name}($arguments);
+        return call_user_func_array([$this, $name], $arguments);
     }
 
     public function user()

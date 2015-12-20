@@ -14,6 +14,8 @@ trait UserLevelTrait
     public $levels;
 
     /**
+     * Get smallest level of user
+     *
      * @return int|null
      */
     public function level()
@@ -22,6 +24,8 @@ trait UserLevelTrait
     }
 
     /**
+     * Get greatest level of user
+     *
      * @return int|null
      */
     public function maxLevel()
@@ -30,6 +34,7 @@ trait UserLevelTrait
     }
 
     /**
+     * Get all level of user
      * @return array
      */
     public function allLevel()
@@ -48,7 +53,7 @@ trait UserLevelTrait
     {
         if (is_array($level)) {
             foreach ($level as $item) {
-                if ($this->getLevel('contains', $item) === false) {
+                if ($this->getLevel('search', $item) === false) {
                     return false;
                 } elseif ($any === true) {
                     return true;
@@ -58,7 +63,7 @@ trait UserLevelTrait
             return true;
         }
 
-        return $this->getLevel('contains', $level);
+        return $this->getLevel('search', $level);
     }
 
     /**

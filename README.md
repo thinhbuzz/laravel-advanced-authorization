@@ -12,6 +12,10 @@
     - [Config package](#config-package)
     - [Config model](#config-model)
 - [Instruction](#instruction)
+    - [Creating data](#creating-data)
+    - [Attach/ detach role and permission](#attach-detach-data)
+    - [Checking role/ permission/ level](#checking-role-permission-level)
+    - [Use Middleware](#check-with-middleware)
 
 ## Installation
 ### Composer
@@ -214,7 +218,7 @@ $role->detachRole([1,2,3]);//assume 1,2,3 is id of $role, $role2, $role3
 $role->detachRole([]);//detach all roles
 ```
 
-### Checking role/ permission
+### Checking role/ permission/ level
 > Always return ``false`` if ``Auth::check() === false``
 
 > All blade shortcuts available if config ``blade_shortcut`` is true
@@ -282,4 +286,76 @@ Check level (available if config ``user_level`` is true)
 @matchAnyLevel([3,5])// check smallest level of user has in array [3,5]
     //your code
 @endMatchAnyLevel
+```
+
+### Check with Middleware
+> Throw new exception if not match, you can change exception class in config with key permission_exception, role_exception, level_exception
+
+Check permission
+```php
+//check user can delete post
+Route::get('/permission', ['middleware' => ['permission:post.delete'], 'uses' => function () {
+    return 'permission';
+}]);
+//check user can delete post and create post
+Route::get('/permission', ['middleware' => ['permission:post.delete&post.create'], 'uses' => function () {
+    return 'permission';
+}]);
+//check user can delete post or create post
+Route::get('/permission', ['middleware' => ['permission:post.delete|post.create'], 'uses' => function () {
+    return 'permission';
+}]);
+```
+
+Check role
+```php
+//check user is admin
+Route::get('/role', ['middleware' => ['role:admin'], 'uses' => function () {
+    return 'role';
+}]);
+//check user is admin and mod
+Route::get('/role', ['middleware' => ['role:admin&mod'], 'uses' => function () {
+    return 'role';
+}]);
+//check user is admin or mod
+Route::get('/role', ['middleware' => ['role:admin|mod'], 'uses' => function () {
+    return 'role';
+}]);
+```
+
+Check level: by default package get smallest level of user and compare, if you want use greatest level you can add prefix "max". Example:
+- level:max1
+- level:max1<=>3
+- level:max<3
+- ...
+
+```php
+//check level smallest of user equal 1
+Route::get('/level', ['middleware' => ['level:1'], 'uses' => function () {
+    return 'level';
+}]);
+//check 1 <= level smallest of user <= 3
+Route::get('/level', ['middleware' => ['level:1<=>3'], 'uses' => function () {
+    return 'level';
+}]);
+//check level smallest of user < 3
+Route::get('/level', ['middleware' => ['level:<3'], 'uses' => function () {
+    return 'level';
+}]);
+//check level smallest of user > 3
+Route::get('/level', ['middleware' => ['level:>3'], 'uses' => function () {
+    return 'level';
+}]);
+//check level smallest of user > 3
+Route::get('/level', ['middleware' => ['level:>3'], 'uses' => function () {
+    return 'level';
+}]);
+//check user has all level in list 1,2,3
+Route::get('/level', ['middleware' => ['level:1&2&3'], 'uses' => function () {
+    return 'level';
+}]);
+//check user has on level in list 1,2,3
+Route::get('/level', ['middleware' => ['level:1|2|3'], 'uses' => function () {
+    return 'level';
+}]);
 ```

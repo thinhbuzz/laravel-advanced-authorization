@@ -40,14 +40,17 @@ class RoleMiddleware
     public function handle($request, Closure $next, $role)
     {
         $roleException = $this->config->get('authorization.role_exception');
-		if (strpos('|', $role) === false) {
-			$separator = '&';
-			$method = 'is';
-		} else {
-			$separator = '|';
-			$method = 'isAny';
-		}
-        if (app('authorization')->{$method}(explode($separator, $role)) === false) {
+        if (strpos($role, '|') !== false) {
+            $method = 'isAny';
+            $roles = explode('|', $role);
+        } elseif (strpos($role, '&') !== false) {
+            $method = 'is';
+            $roles = explode('&', $role);
+        } else {
+            $method = 'is';
+            $roles = $role;
+        }
+        if (app('authorization')->{$method}($roles) === false) {
             throw new $roleException();
         }
 
