@@ -129,10 +129,11 @@ class Permission extends Model
 //Role.php
 namespace App;
 
+use Buzz\Authorization\Interfaces\RoleInterface;
 use Buzz\Authorization\Traits\RoleAuthorizationTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class Role extends Model
+class Role extends Model implements RoleInterface
 {
     use RoleAuthorizationTrait;
     public $table = 'roles';
@@ -140,7 +141,7 @@ class Role extends Model
 ```
 
 ##### User model
-You need to remove trait ``Authorizable`` and contract ``AuthorizableContract`` (default of laravel). And after that, use two trait of the package
+You need to remove trait ``Authorizable`` and contract ``AuthorizableContract`` (default of laravel). And after that, use two trait of the package, implements two interface ``UserAuthorizationInterface``, ``UserLevelInterface``
 ```php
 Buzz\Authorization\Traits\UserAuthorizationTrait;
 Buzz\Authorization\Traits\UserLevelTrait; //only add when you use role level
@@ -149,6 +150,9 @@ Buzz\Authorization\Traits\UserLevelTrait; //only add when you use role level
 Example:
 ```php
 namespace App;
+
+use Buzz\Authorization\Interfaces\UserAuthorizationInterface;
+use Buzz\Authorization\Interfaces\UserLevelInterface;
 use Buzz\Authorization\Traits\UserAuthorizationTrait;
 use Buzz\Authorization\Traits\UserLevelTrait;
 use Illuminate\Auth\Authenticatable;
@@ -157,7 +161,8 @@ use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
-class User extends Model implements AuthenticatableContract, CanResetPasswordContract
+class User extends Model implements AuthenticatableContract,
+    CanResetPasswordContract, UserAuthorizationInterface, UserLevelInterface
 {
     use Authenticatable, CanResetPassword, UserAuthorizationTrait, UserLevelTrait;
 }
@@ -347,18 +352,15 @@ Route::get('/level', ['middleware' => ['level:<3'], 'uses' => function () {
 Route::get('/level', ['middleware' => ['level:>3'], 'uses' => function () {
     return 'level';
 }]);
-//check level smallest of user > 3
-Route::get('/level', ['middleware' => ['level:>3'], 'uses' => function () {
-    return 'level';
-}]);
 //check user has all level in list 1,2,3
 Route::get('/level', ['middleware' => ['level:1&2&3'], 'uses' => function () {
     return 'level';
 }]);
-//check user has on level in list 1,2,3
+//check user has one level in list 1,2,3
 Route::get('/level', ['middleware' => ['level:1|2|3'], 'uses' => function () {
     return 'level';
 }]);
 ```
+
 
 > Docs in the process of finalizing

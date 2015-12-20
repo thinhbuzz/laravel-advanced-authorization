@@ -6,7 +6,6 @@ namespace Buzz\Authorization\Traits;
 
 trait PermissionAuthorizationTrait
 {
-
     /**
      * The roles that belong to the permission.
      *

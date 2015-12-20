@@ -6,6 +6,21 @@ namespace Buzz\Authorization\Traits;
 
 trait RoleAuthorizationTrait
 {
+    /**
+     * @param $permissions
+     */
+    public function attachPermission($permissions)
+    {
+        $this->permissions()->attach($permissions);
+    }
+
+    /**
+     * @param $permissions
+     */
+    public function detachPermission($permissions = [])
+    {
+        $this->permissions()->detach($permissions);
+    }
 
     /**
      * The permissions that belong to the role.
@@ -25,21 +40,5 @@ trait RoleAuthorizationTrait
     public function users()
     {
         return $this->belongsToMany(app('config')->get('authorization.model_user'));
-    }
-
-    /**
-     * @param $permissions
-     */
-    public function detachPermission($permissions = [])
-    {
-        $this->permissions()->detach($permissions);
-    }
-
-    /**
-     * @param $permissions
-     */
-    public function attachPermission($permissions)
-    {
-        $this->permissions()->attach($permissions);
     }
 }

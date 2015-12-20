@@ -29,13 +29,52 @@ trait UserAuthorizationTrait
     public $slugRoles;
 
     /**
-     * The roles that belong to the user.
+     * Append new roles to user
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @param string|array $role
      */
-    public function roles()
+    public function attachRole($roles)
     {
-        return $this->belongsToMany(app('config')->get('authorization.model_role'));
+        $this->roles()->attach($roles);
+    }
+
+    /**
+     * Return true if user has all permissions
+     *
+     * @param string|array $permission
+     * @param bool $any
+     * @return bool
+     */
+    public function can($permission, $any = false)
+    {
+        $this->loadPermissions();
+        if ($permission instanceof Model) {
+            $permission = $permission->slug;
+        }
+        if (is_array($permission)) {
+            foreach ($permission as $item) {
+                if ($this->slugPermissions->search($item) === false) {
+                    return false;
+                } elseif ($any === true) {
+                    return true;
+                }
+            }
+
+            return true;
+        }
+
+        return $this->slugPermissions->search($permission) !== false;
+    }
+
+    /**
+     * Return true if user has one in any permissions
+     *
+     * @param string|array $permission
+     * @return bool
+     */
+    public function canAny($permissions)
+    {
+        return $this->can($permissions, true);
     }
 
     /**
@@ -47,16 +86,6 @@ trait UserAuthorizationTrait
     public function detachRole($roles = [])
     {
         return $this->roles()->detach($roles);
-    }
-
-    /**
-     * Append new roles to user
-     *
-     * @param string|array $role
-     */
-    public function attachRole($roles)
-    {
-        $this->roles()->attach($roles);
     }
 
     /**
@@ -102,57 +131,6 @@ trait UserAuthorizationTrait
     }
 
     /**
-     * Return true if user has all permissions
-     *
-     * @param string|array $permission
-     * @param bool $any
-     * @return bool
-     */
-    public function can($permission, $any = false)
-    {
-        $this->loadPermissions();
-        if ($permission instanceof Model) {
-            $permission = $permission->slug;
-        }
-        if (is_array($permission)) {
-            foreach ($permission as $item) {
-                if ($this->slugPermissions->search($item) === false) {
-                    return false;
-                } elseif ($any === true) {
-                    return true;
-                }
-            }
-
-            return true;
-        }
-
-        return $this->slugPermissions->search($permission) !== false;
-    }
-
-    /**
-     * Return true if user has one in any permissions
-     *
-     * @param string|array $permission
-     * @return bool
-     */
-    public function canAny($permissions)
-    {
-        return $this->can($permissions, true);
-    }
-
-    /**
-     * Return permissions of user
-     *
-     * @return Collection
-     */
-    public function permissions()
-    {
-        $this->loadPermissions();
-
-        return $this->permissions;
-    }
-
-    /**
      * Load permissions of user if not exist
      *
      * @return void
@@ -182,4 +160,27 @@ trait UserAuthorizationTrait
             $this->slugPermissions = $slugPermissions->unique();
         }
     }
+
+    /**
+     * Return permissions of user
+     *
+     * @return Collection
+     */
+    public function permissions()
+    {
+        $this->loadPermissions();
+
+        return $this->permissions;
+    }
+
+    /**
+     * The roles that belong to the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(app('config')->get('authorization.model_role'));
+    }
+
 }

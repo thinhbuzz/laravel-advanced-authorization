@@ -24,17 +24,11 @@ class Authorization
      */
     protected $isLogin;
     protected $user;
-    /*
-     * Config of package
-     * @var array
-     * */
-    protected $config;
 
     public function __construct(Application $app)
     {
         $this->app = $app;
         $this->isLogin = $app['auth']->check();
-        $this->config = $app->config->get('authorization');
         if ($app['auth']->check() === true) {
             $this->isLogin = true;
             $this->user = $app['auth']->user();

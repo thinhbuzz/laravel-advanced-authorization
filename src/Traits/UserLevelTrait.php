@@ -14,6 +14,24 @@ trait UserLevelTrait
     public $levels;
 
     /**
+     * Get all level of user
+     * @return array
+     */
+    public function allLevel()
+    {
+        return $this->getLevel('all');
+    }
+
+    protected function getLevel($method, $value = null)
+    {
+        if (is_null($this->levels)) {
+            $this->levels = $this->roles->lists('level');
+        }
+
+        return $this->levels->{$method}($value);
+    }
+
+    /**
      * Get smallest level of user
      *
      * @return int|null
@@ -21,25 +39,6 @@ trait UserLevelTrait
     public function level()
     {
         return $this->getLevel('min');
-    }
-
-    /**
-     * Get greatest level of user
-     *
-     * @return int|null
-     */
-    public function maxLevel()
-    {
-        return $this->getLevel('max');
-    }
-
-    /**
-     * Get all level of user
-     * @return array
-     */
-    public function allLevel()
-    {
-        return $this->getLevel('all');
     }
 
     /**
@@ -77,12 +76,13 @@ trait UserLevelTrait
         return $this->matchLevel($levels, true);
     }
 
-    protected function getLevel($method, $value = null)
+    /**
+     * Get greatest level of user
+     *
+     * @return int|null
+     */
+    public function maxLevel()
     {
-        if (is_null($this->levels)) {
-            $this->levels = $this->roles->lists('level');
-        }
-
-        return $this->levels->{$method}($value);
+        return $this->getLevel('max');
     }
 }
