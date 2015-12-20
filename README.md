@@ -36,7 +36,7 @@ Or open composer.json, insert into bellow code and run command ``composer update
 
 Insert two providers to ``providers`` (``config/app.php``)
 
-```
+```php
 \Buzz\Authorization\AuthorizationServiceProvider::class,
 \Buzz\Authorization\UtilitieServiceProvider::class,
 ```
@@ -50,7 +50,7 @@ By default, the package will automatically add ``Authorization`` to ``aliases``,
 
 Open ``app/Http/Kernel.php`` and insert into bellow code to routeMiddleware:
 
-```
+```php
 'role' => \Buzz\Authorization\Middleware\RoleMiddleware::class,
 'permission' => \Buzz\Authorization\Middleware\PermissionMiddleware::class,
 'level' => \Buzz\Authorization\Middleware\LevelMiddleware::class,
@@ -71,7 +71,7 @@ To perform these commands, ``UtilitieServiceProvider`` added to ``providers`` (`
 
 ### Config package
 
-```
+```php
 /*
  * Class name of models
  *
@@ -110,7 +110,8 @@ To perform these commands, ``UtilitieServiceProvider`` added to ``providers`` (`
 ### Config model
 ##### Permission and Role models
 Two models will appear after run command published successfully. You can edit, custom any thing you want, but not remove default trait available.
-Ex:
+
+Example:
 
 ```php
 // Permission.php
@@ -137,15 +138,15 @@ class Role extends Model
     public $table = 'roles';
 }
 ```
+
 ##### User model
 You need to remove trait ``Authorizable`` and contract ``AuthorizableContract`` (default of laravel). And after that, use two trait of the package
-
-```
+```php
 Buzz\Authorization\Traits\UserAuthorizationTrait;
 Buzz\Authorization\Traits\UserLevelTrait; //only add when you use role level
 ```
 
-Ex:
+Example:
 ```php
 namespace App;
 use Buzz\Authorization\Traits\UserAuthorizationTrait;
@@ -359,3 +360,5 @@ Route::get('/level', ['middleware' => ['level:1|2|3'], 'uses' => function () {
     return 'level';
 }]);
 ```
+
+> Docs in the process of finalizing
