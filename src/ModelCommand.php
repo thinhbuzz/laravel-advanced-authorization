@@ -33,15 +33,15 @@ class ModelCommand extends Command
         $this->line('');
         if ($this->confirm('Do you want publish default models?', 'yes')) {
             /*publish role model*/
-            $this->publishModel($config['model_role'], 'Role.stub');
+            $this->publishModel(str_replace('\\', '/', $config['model_role']), 'Role.stub');
             /*publish permission model*/
-            $this->publishModel($config['model_permission'], 'Permission.stub');
+            $this->publishModel(str_replace('\\', '/', $config['model_permission']), 'Permission.stub');
         }
     }
 
     protected function getModelData($path, $stub)
     {
-        $packageModelPath = realpath(__DIR__ . '/../models') . DIRECTORY_SEPARATOR;
+        $packageModelPath = realpath(__DIR__ . '/../models') . '/';
         $tmpData = file_get_contents($packageModelPath . $stub);
 
         return sprintf($tmpData, dirname($path), basename($path));
@@ -63,7 +63,7 @@ class ModelCommand extends Command
             $this->error(sprintf('Directory %s not exist', $path['dirname']));
         } else {
             if (file_put_contents(
-                $path['realpath'] . DIRECTORY_SEPARATOR . basename($model) . '.php',
+                $path['realpath'] . '/' . basename(str_replace('\\', '/', $model)) . '.php',
                 $this->getModelData($model, $stub))
             ) {
                 $this->info(sprintf('Published model: %s', $model));

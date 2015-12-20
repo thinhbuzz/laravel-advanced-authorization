@@ -13,7 +13,7 @@ interface UserAuthorizationInterface
      *
      * @param string|array $role
      */
-    public function attachRole($roles = []);
+    public function attachRole($roles);
 
     /**
      * Return true if user has all permissions
@@ -30,7 +30,7 @@ interface UserAuthorizationInterface
      * @param string|array $permission
      * @return bool
      */
-    public function canAny($permission, $any = false);
+    public function canAny($permission);
 
     /**
      * Remove roles from users

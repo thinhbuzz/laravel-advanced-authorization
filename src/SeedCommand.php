@@ -45,7 +45,7 @@ class SeedCommand extends Command
         $config = $this->laravel->config->get('authorization');
         $this->line('');
         if ($this->confirm('Do you want publish default seeder?', 'yes')) {
-            $stub = realpath(__DIR__ . '/../seeder') . DIRECTORY_SEPARATOR . 'AuthorizationSeeder.stub';
+            $stub = realpath(__DIR__ . '/../seeder') . '/AuthorizationSeeder.stub';
             $data = file_get_contents($stub);
             $data = str_replace('%n_role%', $config['model_role'], $data);
             $data = str_replace('%n_permission%', $config['model_permission'], $data);
@@ -56,7 +56,7 @@ class SeedCommand extends Command
 
                 return;
             }
-            if (file_put_contents($seedPath . DIRECTORY_SEPARATOR . 'AuthorizationSeeder.php', $data)) {
+            if (file_put_contents($seedPath . '/AuthorizationSeeder.php', $data)) {
                 $this->info('Publish seeder successfully.');
                 $this->composer->dumpAutoloads();
             } else {
