@@ -29,14 +29,11 @@ class UtilitieServiceProvider extends ServiceProvider
             'command.authorization.model',
             'command.authorization.seeder'
         ]);
-        /*publish migration*/
+        /*publish migration and config*/
         $this->publishes([
-            realpath(__DIR__ . '/../migrations/') => base_path('/database/migrations')
-        ], 'migrations');
-        /*publish config*/
-        $path = __DIR__ . '/../config/config.php';
-        $this->publishes([$path => config_path('authorization.php')], 'config');
-        $this->mergeConfigFrom($path, 'authorization');
+            __DIR__ . '/../migrations/' => base_path('/database/migrations'),
+            __DIR__ . '/../config/config.php' => config_path('authorization.php')
+        ]);
     }
 
     /**

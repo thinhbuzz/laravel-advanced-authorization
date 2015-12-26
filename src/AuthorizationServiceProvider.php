@@ -24,6 +24,7 @@ class AuthorizationServiceProvider extends ServiceProvider
     {
         $this->registerAlias();
         $this->registerBladeShortcut();
+        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'authorization');
     }
 
     /**

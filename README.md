@@ -60,8 +60,7 @@ Open ``app/Http/Kernel.php`` and insert into bellow code to routeMiddleware:
 - So publish config, migration you can run command
 
 ```
-php artisan vendor:publish --provider="\Buzz\Authorization\UtilitieServiceProvider" --tag=config
-php artisan vendor:publish --provider="\Buzz\Authorization\UtilitieServiceProvider" --tag=migrations
+php artisan vendor:publish
 ```
 
 And after that run command: ``php artisan migrate`` (maybe you want edit migration file before run this command)
