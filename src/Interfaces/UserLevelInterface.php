@@ -15,7 +15,7 @@ interface UserLevelInterface
      * Get avg level of user
      * @return float|int
      */
-    public function avgLevel();
+    public function avgLevel($round = false);
 
     /**
      * Get smallest level of user
