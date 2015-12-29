@@ -22,9 +22,9 @@ class AuthorizationServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'authorization');
         $this->registerAlias();
         $this->registerBladeShortcut();
-        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'authorization');
     }
 
     /**
@@ -53,8 +53,7 @@ class AuthorizationServiceProvider extends ServiceProvider
     {
         $config = $this->app->config->get('authorization');
         if ($config['auto_alias'] === true) {
-            $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-            $loader->alias($config['alias'], AuthorizationFacade::class);
+            \Illuminate\Foundation\AliasLoader::getInstance()->alias($config['alias'], AuthorizationFacade::class);
         }
     }
 

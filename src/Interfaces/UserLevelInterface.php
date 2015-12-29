@@ -11,6 +11,11 @@ interface UserLevelInterface
      * @return array
      */
     public function allLevel();
+    /**
+     * Get avg level of user
+     * @return float|int
+     */
+    public function avgLevel();
 
     /**
      * Get smallest level of user
