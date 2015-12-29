@@ -98,7 +98,7 @@ trait UserAuthorizationTrait
     public function is($role, $any = false)
     {
         if (is_null($this->slugRoles)) {
-            $this->slugRoles = new Collection();
+            $this->loadRoles();
             $this->slugRoles = $this->roles->lists('slug');
         }
         if ($role instanceof Model) {
@@ -131,6 +131,37 @@ trait UserAuthorizationTrait
     }
 
     /**
+     * Check status load roles
+     * @return bool
+     */
+    protected function isLoadRoles()
+    {
+        return isset($this->relations['roles']);
+    }
+
+    /**
+     * Load roles of user if not exist
+     */
+    protected function loadRoles()
+    {
+        if (!$this->isLoadRoles()) {
+            $this->load('roles');
+        }
+    }
+
+    /**
+     * Check status load permission relations
+     * @return bool
+     */
+    protected function isLoadPermissions()
+    {
+        if (!$this->isLoadRoles())
+            return false;
+
+        return is_object(($firstRole = $this->roles->first())) && isset($firstRole->relations['permissions']);
+    }
+
+    /**
      * Load permissions of user if not exist
      *
      * @return void
@@ -138,8 +169,8 @@ trait UserAuthorizationTrait
     protected function loadPermissions()
     {
         if (is_null($this->slugPermissions)) {
-            if (!is_null($this->roles)) {
-                if (is_object(($firstRole = $this->roles->first())) && is_null($firstRole->slugPermissions)) {
+            if ($this->isLoadRoles()) {
+                if (!$this->isLoadPermissions()) {
                     $this->roles->load('permissions');
                 }
             } else {
