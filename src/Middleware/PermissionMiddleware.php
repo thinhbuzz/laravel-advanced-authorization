@@ -43,7 +43,7 @@ class PermissionMiddleware
         if (strpos($permission, '|') !== false) {
             $method = 'canAny';
             $permissions = explode('|', $permission);
-        } elseif (strpos($permission, '|') !== false) {
+        } elseif (strpos($permission, '&') !== false) {
             $method = 'can';
             $permissions = explode('&', $permission);
         } else {

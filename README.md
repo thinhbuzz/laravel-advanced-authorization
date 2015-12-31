@@ -65,9 +65,6 @@ php artisan vendor:publish
 
 And after that run command: ``php artisan migrate`` (maybe you want edit migration file before run this command)
 
-- So publish seed, model you can run command: ``php artisan authorization:seeder`` and ``php artisan authorization:model``
-To perform these commands, ``UtilitieServiceProvider`` added to ``providers`` (``config/app.php``) is required
-
 ### Config package
 
 ```php
@@ -107,6 +104,10 @@ To perform these commands, ``UtilitieServiceProvider`` added to ``providers`` (`
 ```
 
 ### Config model
+
+So publish seed, model you can run command: ``php artisan authorization:seeder`` and ``php artisan authorization:model``.
+To perform these commands, ``UtilitieServiceProvider`` added to ``providers`` (``config/app.php``) is required
+
 ##### Permission and Role models
 Two models will appear after run command published successfully. You can edit, custom any thing you want, but not remove default trait available.
 
