@@ -3,11 +3,10 @@
 
 namespace %s;
 
-use Buzz\Authorization\Interfaces\RoleInterface;
 use Buzz\Authorization\Traits\RoleAuthorizationTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class %s extends Model implements RoleInterface
+class %s extends Model
 {
     use RoleAuthorizationTrait;
     public $table = 'roles';

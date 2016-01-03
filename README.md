@@ -65,8 +65,6 @@ php artisan vendor:publish
 
 And after that run command: ``php artisan migrate`` (maybe you want edit migration file before run this command)
 
-- So publish seed, model you can run command: ``php artisan authorization:seeder`` and ``php artisan authorization:model``
-To perform these commands, ``UtilitieServiceProvider`` added to ``providers`` (``config/app.php``) is required
 
 ### Config package
 
@@ -108,12 +106,18 @@ To perform these commands, ``UtilitieServiceProvider`` added to ``providers`` (`
 
 ],
 'cache' => [
-    'enable' => false,
-    'minutes' => 43829 //a month
+    'enable' => true,
+    'event' => true, // enable listen event for forget and update cache
+    'time' => 43829, //a month
+    'auto_update' => false,//false: forget cache, true: forget and put new cache
 ]
 ```
 
 ### Config model
+
+So publish seed, model you can run command: ``php artisan authorization:seeder`` and ``php artisan authorization:model``.
+To perform these commands, ``UtilitieServiceProvider`` added to ``providers`` (``config/app.php``) is required
+
 ##### Permission and Role models
 Two models will appear after run command published successfully. You can edit, custom any thing you want, but not remove default trait available.
 
@@ -135,11 +139,10 @@ class Permission extends Model
 //Role.php
 namespace App;
 
-use Buzz\Authorization\Interfaces\RoleInterface;
 use Buzz\Authorization\Traits\RoleAuthorizationTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class Role extends Model implements RoleInterface
+class Role extends Model
 {
     use RoleAuthorizationTrait;
     public $table = 'roles';
@@ -147,7 +150,7 @@ class Role extends Model implements RoleInterface
 ```
 
 ##### User model
-You need to remove trait ``Authorizable`` and contract ``AuthorizableContract`` (default of laravel). And after that, use two trait of the package, implements two interface ``UserAuthorizationInterface``, ``UserLevelInterface``
+You need to remove trait ``Authorizable`` and contract ``AuthorizableContract`` (default of laravel). And after that, use two trait of the package.
 ```php
 Buzz\Authorization\Traits\UserAuthorizationTrait;
 Buzz\Authorization\Traits\UserLevelTrait; //only add when you use role level
@@ -157,8 +160,6 @@ Example:
 ```php
 namespace App;
 
-use Buzz\Authorization\Interfaces\UserAuthorizationInterface;
-use Buzz\Authorization\Interfaces\UserLevelInterface;
 use Buzz\Authorization\Traits\UserAuthorizationTrait;
 use Buzz\Authorization\Traits\UserLevelTrait;
 use Illuminate\Auth\Authenticatable;
@@ -167,8 +168,7 @@ use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
-class User extends Model implements AuthenticatableContract,
-    CanResetPasswordContract, UserAuthorizationInterface, UserLevelInterface
+class User extends Model implements AuthenticatableContract, CanResetPasswordContract
 {
     use Authenticatable, CanResetPassword, UserAuthorizationTrait, UserLevelTrait;
 }
