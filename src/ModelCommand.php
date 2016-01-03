@@ -8,7 +8,6 @@ use Illuminate\Console\Command;
 
 class ModelCommand extends Command
 {
-    protected $packageModels = ['Role', 'Permission'];
     /**
      * The name and signature of the console command.
      *

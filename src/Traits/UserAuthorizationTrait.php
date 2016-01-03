@@ -39,7 +39,7 @@ trait UserAuthorizationTrait
      *
      * @param string|array $role
      */
-    public function attachRole($roles)
+    public function attachRoles($roles)
     {
         $this->roles()->attach($roles);
         app('events')->fire('roles.attached', $this);
@@ -90,7 +90,7 @@ trait UserAuthorizationTrait
      * @param string|array $roles
      * @return int
      */
-    public function detachRole($roles = [])
+    public function detachRoles($roles = [])
     {
         $res = $this->roles()->detach($roles);
         app('events')->fire('roles.detached', $this);
@@ -220,7 +220,7 @@ trait UserAuthorizationTrait
      *
      * @return array
      */
-    public function syncRole($roles)
+    public function syncRoles($roles)
     {
         $res = $this->roles()->sync($roles);
         app('events')->fire('roles.synced', $this);

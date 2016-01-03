@@ -8,7 +8,6 @@
     - [Alias](#alias)
     - [Middleware](#middleware)
 - [Configuration](#configuration)
-    - [Pubslish](#pubslish)
     - [Config package](#config-package)
     - [Config model](#config-model)
 - [Instruction](#instruction)
@@ -16,6 +15,7 @@
     - [Attach/ detach role and permission](#attach-detach-data)
     - [Checking role/ permission/ level](#checking-role-permission-level)
     - [Use Middleware](#check-with-middleware)
+    - [Use Cache](#use-cache)
 
 ## Installation
 ### Composer
@@ -23,13 +23,13 @@
 Run command:
   
 ```
-composer require buzz/laravel-advanced-authorization 1.*
+composer require buzz/laravel-advanced-authorization 2.*
 ```
     
 Or open composer.json, insert into bellow code and run command ``composer update`` 
     
 ```
-"buzz/laravel-advanced-authorization": "1.*",
+"buzz/laravel-advanced-authorization": "2.*",
 ``` 
 
 ### Provider
@@ -80,6 +80,8 @@ And after that run command: ``php artisan migrate`` (maybe you want edit migrati
 ],
 /*
  * Auto add Authorization to alias, if you want change or disable you can change in here.
+ * This is equivalent to insert the following code to to aliases
+ * 'Authorization' => \Buzz\Authorization\AuthorizationFacade::class,
  *
  * */
 'auto_alias' => true,
@@ -217,17 +219,17 @@ $role->detachPermissions([]);//detach all permissions
 ```php
 $user = \App\User::find(1);//depend "model_user" config 
 //attach
-$role->attachRole($role);//input is object
-$role->attachRole([$role, $role2, $role3]);//input is array objects
-$role->attachRole(1);//assume 1 is id of $role
-$role->attachRole([1,2,3]);//assume 1,2,3 is id of $role, $role2, $role3
+$role->attachRoles($role);//input is object
+$role->attachRoles([$role, $role2, $role3]);//input is array objects
+$role->attachRoles(1);//assume 1 is id of $role
+$role->attachRoles([1,2,3]);//assume 1,2,3 is id of $role, $role2, $role3
 
 //detach
-$role->detachRole($role);//input is object
-$role->detachRole([$role, $role2, $role3]);//input is array objects
-$role->detachRole(1);//assume 1 is id of $role
-$role->detachRole([1,2,3]);//assume 1,2,3 is id of $role, $role2, $role3
-$role->detachRole([]);//detach all roles
+$role->detachRoles($role);//input is object
+$role->detachRoles([$role, $role2, $role3]);//input is array objects
+$role->detachRoles(1);//assume 1 is id of $role
+$role->detachRoles([1,2,3]);//assume 1,2,3 is id of $role, $role2, $role3
+$role->detachRoles([]);//detach all roles
 ```
 
 ### Checking role/ permission/ level
@@ -368,5 +370,16 @@ Route::get('/level', ['middleware' => ['level:1|2|3'], 'uses' => function () {
 }]);
 ```
 
+#### Use cache
+When config ``cache.enable`` is true, cache will be created in first request, cache will be forgot when:
+- attach roles
+- detach roles
+- sync role
+- attach permission
+- detach permission
+- sync permission
+- update level value of role
+- delete a role
+- delete a permissions
 
 > Docs in the process of finalizing

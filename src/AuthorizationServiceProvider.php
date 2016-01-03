@@ -151,7 +151,7 @@ class AuthorizationServiceProvider extends ServiceProvider
             });
 
             $event->listen(sprintf('eloquent.updated: %s', array_get($config, 'model.role')), function ($role) {
-                if ($role->isDirty('level')) {
+                if ($role->isDirty('level') && $this->app->config->get('authorization.user_level')) {
                     (new UpdateRoleLevelEvent($role))->boot();
                 }
             });
