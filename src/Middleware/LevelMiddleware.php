@@ -39,7 +39,7 @@ class LevelMiddleware
      */
     public function handle($request, Closure $next, $level)
     {
-        $levelException = $this->config->get('authorization.level_exception');
+        $levelException = $this->config->get('authorization.exception.level');
         if (strpos($level, 'max') === 0) {
             $level = substr($level, 3);
             $userLevel = app('authorization')->maxLevel();

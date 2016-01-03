@@ -39,7 +39,7 @@ class RoleMiddleware
      */
     public function handle($request, Closure $next, $role)
     {
-        $roleException = $this->config->get('authorization.role_exception');
+        $roleException = $this->config->get('authorization.exception.role');
         if (strpos($role, '|') !== false) {
             $method = 'isAny';
             $roles = explode('|', $role);

@@ -39,11 +39,11 @@ class PermissionMiddleware
      */
     public function handle($request, Closure $next, $permission)
     {
-        $permissionException = $this->config->get('authorization.permission_exception');
+        $permissionException = $this->config->get('authorization.exception.permission');
         if (strpos($permission, '|') !== false) {
             $method = 'canAny';
             $permissions = explode('|', $permission);
-        } elseif (strpos($permission, '&') !== false) {
+        } elseif (strpos($permission, '|') !== false) {
             $method = 'can';
             $permissions = explode('&', $permission);
         } else {

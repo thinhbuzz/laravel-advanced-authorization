@@ -56,18 +56,18 @@ class AuthorizationSeeder extends Seeder
             'slug' => 'admin',
             'level' => 1,
         ]);
-        $role->attachPermission([1,2,3,4,5,6,7,8]);
+        $role->attachPermissions([1,2,3,4,5,6,7,8]);
         $role = %role%::create([
             'name' => 'Poster',
             'slug' => 'poster',
             'level' => 2,
         ]);
-        $role->attachPermission([1,2,3]);
+        $role->attachPermissions([1,2,3]);
         $role = %role%::create([
             'name' => 'New Registered Users',
             'slug' => 'registered.user',
             'level' => 3,
         ]);
-        $role->attachPermission([1,2]);
+        $role->attachPermissions([1,2]);
     }
 }

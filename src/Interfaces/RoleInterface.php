@@ -10,10 +10,10 @@ interface RoleInterface
     /**
      * @param $permissions
      */
-    public function attachPermission($permissions);
+    public function attachPermissions($permissions);
 
     /**
      * @param $permissions
      */
-    public function detachPermission($permissions = []);
+    public function detachPermissions($permissions = []);
 }

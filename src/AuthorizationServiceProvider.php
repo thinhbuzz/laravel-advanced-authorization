@@ -3,6 +3,12 @@
 
 namespace Buzz\Authorization;
 
+use Buzz\Authorization\Events\DeletePermissionEvent;
+use Buzz\Authorization\Events\DeleteRoleEvent;
+use Buzz\Authorization\Events\UpdateRoleLevelEvent;
+use Buzz\Authorization\Events\UpdateRolePermissionEvent;
+use Buzz\Authorization\Events\UpdateUserEvent;
+use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
 
 class AuthorizationServiceProvider extends ServiceProvider
@@ -25,6 +31,7 @@ class AuthorizationServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'authorization');
         $this->registerAlias();
         $this->registerBladeShortcut();
+        $this->registerEvents();
     }
 
     /**
@@ -53,7 +60,8 @@ class AuthorizationServiceProvider extends ServiceProvider
     {
         $config = $this->app->config->get('authorization');
         if ($config['auto_alias'] === true) {
-            \Illuminate\Foundation\AliasLoader::getInstance()->alias($config['alias'], AuthorizationFacade::class);
+            \Illuminate\Foundation\AliasLoader::getInstance()
+                ->alias($config['alias'], AuthorizationFacade::class);
         }
     }
 
@@ -127,6 +135,43 @@ class AuthorizationServiceProvider extends ServiceProvider
                     return "<?php endif; ?>";
                 });
             }
+        }
+    }
+
+    protected function registerEvents()
+    {
+        $config = $this->app->config->get('authorization');
+        if (array_get($config, 'cache.event')) {
+            $event = $this->app->events;
+            $event->listen(['roles.attached', 'roles.detached', 'roles.synced'], function ($user) {
+                (new UpdateUserEvent($user))->boot();
+            });
+            $event->listen(['permissions.attached', 'permissions.detached', 'permissions.synced'], function ($role) {
+                (new UpdateRolePermissionEvent($role))->boot();
+            });
+
+            $event->listen(sprintf('eloquent.updated: %s', array_get($config, 'model.role')), function ($role) {
+                if ($role->isDirty('level')) {
+                    (new UpdateRoleLevelEvent($role))->boot();
+                }
+            });
+            $event->listen(sprintf('eloquent.deleting: %s', array_get($config, 'model.role')), function ($role) {
+                $userIds = $role->users()->get()->lists('id');
+                $this->app->session->put('authorization.user_id', $userIds);
+            });
+
+            $event->listen(sprintf('eloquent.deleted: %s', array_get($config, 'model.role')), function ($role) {
+                $userIds = $this->app->session->pull('authorization.user_id');
+                (new DeleteRoleEvent($userIds))->boot();
+            });
+            $event->listen(sprintf('eloquent.deleting: %s', array_get($config, 'model.permission')), function ($permission) {
+                $roles = $permission->roles()->with('users')->get();
+                $this->app->session->put('authorization.roles', $roles);
+            });
+            $event->listen(sprintf('eloquent.deleted: %s', array_get($config, 'model.permission')), function ($permission) {
+                $roles = $this->app->session->pull('authorization.roles');
+                (new DeletePermissionEvent($roles))->boot();
+            });
         }
     }
 }

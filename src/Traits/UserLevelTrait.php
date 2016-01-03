@@ -21,24 +21,21 @@ trait UserLevelTrait
     {
         return $this->getLevel('all');
     }
-	
+
     /**
      * Get avg level of user
-     * @return float|int
+     * @return float
      */
     public function avgLevel($round = false)
     {
-		if ($round === true)
-			return round($this->getLevel('avg'));
+        if ($round === true)
+            return round($this->getLevel('avg'));
         return $this->getLevel('avg');
     }
 
     protected function getLevel($method, $value = null)
     {
-        $this->loadRoles();
-        if (is_null($this->levels)) {
-            $this->levels = $this->roles->lists('level');
-        }
+        $this->loadDataClass()->getLevels();
 
         return $this->levels->{$method}($value);
     }

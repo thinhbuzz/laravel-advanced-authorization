@@ -65,6 +65,9 @@ php artisan vendor:publish
 
 And after that run command: ``php artisan migrate`` (maybe you want edit migration file before run this command)
 
+- So publish seed, model you can run command: ``php artisan authorization:seeder`` and ``php artisan authorization:model``
+To perform these commands, ``UtilitieServiceProvider`` added to ``providers`` (``config/app.php``) is required
+
 ### Config package
 
 ```php
@@ -72,13 +75,13 @@ And after that run command: ``php artisan migrate`` (maybe you want edit migrati
  * Class name of models
  *
  * */
-'model_role' => \App\Role::class,
-'model_permission' => \App\Permission::class,
-'model_user' => \App\User::class,
+'model' => [
+    'role' => \App\Role::class,
+    'permission' => \App\Permission::class,
+    'user' => \App\User::class,
+],
 /*
  * Auto add Authorization to alias, if you want change or disable you can change in here.
- * This is equivalent to insert the following code to to aliases
- * 'Authorization' => \Buzz\Authorization\AuthorizationFacade::class,
  *
  * */
 'auto_alias' => true,
@@ -95,19 +98,22 @@ And after that run command: ``php artisan migrate`` (maybe you want edit migrati
 /*
  * Exception class name is used in middleware
  * */
-'role_exception' => \Buzz\Authorization\Exception\RoleDeniedException::class,
-'permission_exception' => \Buzz\Authorization\Exception\PermissionDeniedException::class,
-/*
- * level_exception will be required if option user_level is true and you use level middleware
- * */
-'level_exception' => \Buzz\Authorization\Exception\LevelDeniedException::class
+'exception' => [
+    'role' => \Buzz\Authorization\Exception\RoleDeniedException::class,
+    'permission' => \Buzz\Authorization\Exception\PermissionDeniedException::class,
+    /*
+     * level will be required if option user_level is true and you use level middleware
+     * */
+    'level' => \Buzz\Authorization\Exception\LevelDeniedException::class,
+
+],
+'cache' => [
+    'enable' => false,
+    'minutes' => 43829 //a month
+]
 ```
 
 ### Config model
-
-So publish seed, model you can run command: ``php artisan authorization:seeder`` and ``php artisan authorization:model``.
-To perform these commands, ``UtilitieServiceProvider`` added to ``providers`` (``config/app.php``) is required
-
 ##### Permission and Role models
 Two models will appear after run command published successfully. You can edit, custom any thing you want, but not remove default trait available.
 
@@ -193,17 +199,17 @@ $role->save();
 
 ```php
 //attach
-$role->attachPermission($permission);//input is object
-$role->attachPermission([$permission, $permission2, $permission3]);//input is array objects
-$role->attachPermission(1);//assume 1 is id of $permission
-$role->attachPermission([1,2,3]);//assume 1,2,3 is id of $permission, $permission2, $permission3
+$role->attachPermissions($permission);//input is object
+$role->attachPermissions([$permission, $permission2, $permission3]);//input is array objects
+$role->attachPermissions(1);//assume 1 is id of $permission
+$role->attachPermissions([1,2,3]);//assume 1,2,3 is id of $permission, $permission2, $permission3
 
 //detach
-$role->detachPermission($permission);//input is object
-$role->detachPermission([$permission, $permission2, $permission3]);//input is array objects
-$role->detachPermission(1);//assume 1 is id of $permission
-$role->detachPermission([1,2,3]);//assume 1,2,3 is id of $permission, $permission2, $permission3
-$role->detachPermission([]);//detach all permissions
+$role->detachPermissions($permission);//input is object
+$role->detachPermissions([$permission, $permission2, $permission3]);//input is array objects
+$role->detachPermissions(1);//assume 1 is id of $permission
+$role->detachPermissions([1,2,3]);//assume 1,2,3 is id of $permission, $permission2, $permission3
+$role->detachPermissions([]);//detach all permissions
 ```
 
 #### Attach/ detach roles
@@ -295,7 +301,7 @@ Check level (available if config ``user_level`` is true)
 ```
 
 ### Check with Middleware
-> Throw new exception if not match, you can change exception class in config with key permission_exception, role_exception, level_exception
+> Throw new exception if not match, you can change exception class in config with key permission_exception, exception.role, level_exception
 
 Check permission
 ```php

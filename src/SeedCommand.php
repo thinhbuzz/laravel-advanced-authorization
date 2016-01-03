@@ -47,10 +47,10 @@ class SeedCommand extends Command
         if ($this->confirm('Do you want publish default seeder?', 'yes')) {
             $stub = realpath(__DIR__ . '/../seeder') . '/AuthorizationSeeder.stub';
             $data = file_get_contents($stub);
-            $data = str_replace('%n_role%', $config['model_role'], $data);
-            $data = str_replace('%n_permission%', $config['model_permission'], $data);
-            $data = str_replace('%role%', basename($config['model_role']), $data);
-            $data = str_replace('%permission%', basename($config['model_permission']), $data);
+            $data = str_replace('%n_role%', array_get($config, 'model.role'), $data);
+            $data = str_replace('%n_permission%', array_get($config, 'model.permission'), $data);
+            $data = str_replace('%role%', basename(array_get($config, 'model.role')), $data);
+            $data = str_replace('%permission%', array_get($config, 'model.permission'), $data);
             if (file_exists($seedPath = database_path('seeds')) === false) {
                 $this->error(sprintf('Directory %s not exist.', $seedPath));
 

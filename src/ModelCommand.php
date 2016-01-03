@@ -33,9 +33,9 @@ class ModelCommand extends Command
         $this->line('');
         if ($this->confirm('Do you want publish default models?', 'yes')) {
             /*publish role model*/
-            $this->publishModel(str_replace('\\', '/', $config['model_role']), 'Role.stub');
+            $this->publishModel(str_replace('\\', '/', array_get($config, 'model.role')), 'Role.stub');
             /*publish permission model*/
-            $this->publishModel(str_replace('\\', '/', $config['model_permission']), 'Permission.stub');
+            $this->publishModel(str_replace('\\', '/', array_get($config, 'model.permission')), 'Permission.stub');
         }
     }
 

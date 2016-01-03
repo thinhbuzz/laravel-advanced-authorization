@@ -4,6 +4,8 @@
 namespace Buzz\Authorization\Traits;
 
 
+use Buzz\Authorization\LoadData\CacheAuthorization;
+use Buzz\Authorization\LoadData\WithoutCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
@@ -27,6 +29,10 @@ trait UserAuthorizationTrait
      * @var \Illuminate\Support\Collection
      */
     public $slugRoles;
+    /**
+     * @var CacheAuthorization|WithoutCache
+     */
+    public $dataAuthorzation;
 
     /**
      * Append new roles to user
@@ -36,6 +42,7 @@ trait UserAuthorizationTrait
     public function attachRole($roles)
     {
         $this->roles()->attach($roles);
+        app('events')->fire('roles.attached', $this);
     }
 
     /**
@@ -47,7 +54,7 @@ trait UserAuthorizationTrait
      */
     public function can($permission, $any = false)
     {
-        $this->loadPermissions();
+        $this->loadDataClass()->getPermission();
         if ($permission instanceof Model) {
             $permission = $permission->slug;
         }
@@ -85,7 +92,24 @@ trait UserAuthorizationTrait
      */
     public function detachRole($roles = [])
     {
-        return $this->roles()->detach($roles);
+        $res = $this->roles()->detach($roles);
+        app('events')->fire('roles.detached', $this);
+
+        return $res;
+    }
+
+    public function forceUpdateCache()
+    {
+        if ((app('config')->get('authorization.cache.enable')) === true) {
+            $this->loadDataClass()->forceUpdateCache();
+        }
+    }
+
+    public function forgetCache()
+    {
+        if ((app('config')->get('authorization.cache.enable')) === true) {
+            $this->loadDataClass()->forgetCache();
+        }
     }
 
     /**
@@ -97,10 +121,7 @@ trait UserAuthorizationTrait
      */
     public function is($role, $any = false)
     {
-        if (is_null($this->slugRoles)) {
-            $this->loadRoles();
-            $this->slugRoles = $this->roles->lists('slug');
-        }
+        $this->loadDataClass()->getRoles();
         if ($role instanceof Model) {
             $role = $role->slug;
         }
@@ -130,30 +151,29 @@ trait UserAuthorizationTrait
         return $this->is($role, true);
     }
 
+    protected function loadDataClass()
+    {
+        if (is_null($this->dataAuthorzation)) {
+            $this->dataAuthorzation = (app('config')->get('authorization.cache.enable')) === true ?
+                (new CacheAuthorization($this)) : (new WithoutCache($this));
+        }
+        return $this->dataAuthorzation;
+    }
+
     /**
      * Check status load roles
      * @return bool
      */
-    protected function isLoadRoles()
+    public function isLoadRoles()
     {
         return isset($this->relations['roles']);
-    }
-
-    /**
-     * Load roles of user if not exist
-     */
-    protected function loadRoles()
-    {
-        if (!$this->isLoadRoles()) {
-            $this->load('roles');
-        }
     }
 
     /**
      * Check status load permission relations
      * @return bool
      */
-    protected function isLoadPermissions()
+    public function isLoadPermissions()
     {
         if (!$this->isLoadRoles())
             return false;
@@ -162,33 +182,12 @@ trait UserAuthorizationTrait
     }
 
     /**
-     * Load permissions of user if not exist
-     *
-     * @return void
+     * Load roles of user if not exist
      */
-    protected function loadPermissions()
+    public function loadRoles()
     {
-        if (is_null($this->slugPermissions)) {
-            if ($this->isLoadRoles()) {
-                if (!$this->isLoadPermissions()) {
-                    $this->roles->load('permissions');
-                }
-            } else {
-                $this->load(['roles.permissions']);
-            }
-            $slugPermissions = new Collection();
-            $permissions = new Collection();
-            $this->roles->each(function ($item, $key) use (&$permissions, &$slugPermissions) {
-                $slugPermissions = $slugPermissions->merge($item->permissions->lists('slug'));
-                $item->permissions->each(function ($v, $k) use (&$permissions) {
-                    $tmpSlug = $permissions->lists('slug');
-                    if ($tmpSlug->search($v->slug) === false) {
-                        $permissions->push($v);
-                    }
-                });
-            });
-            $this->permissions = $permissions;
-            $this->slugPermissions = $slugPermissions->unique();
+        if (!$this->isLoadRoles()) {
+            $this->load('roles');
         }
     }
 
@@ -199,7 +198,7 @@ trait UserAuthorizationTrait
      */
     public function permissions()
     {
-        $this->loadPermissions();
+        (new WithoutCache($this))->getPermission();
 
         return $this->permissions;
     }
@@ -211,7 +210,21 @@ trait UserAuthorizationTrait
      */
     public function roles()
     {
-        return $this->belongsToMany(app('config')->get('authorization.model_role'));
+        return $this->belongsToMany(app('config')->get('authorization.model.role'));
     }
 
+    /**
+     * Sync roles of user
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection|array $roles
+     *
+     * @return array
+     */
+    public function syncRole($roles)
+    {
+        $res = $this->roles()->sync($roles);
+        app('events')->fire('roles.synced', $this);
+
+        return $res;
+    }
 }

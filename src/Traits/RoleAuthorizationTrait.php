@@ -9,17 +9,24 @@ trait RoleAuthorizationTrait
     /**
      * @param $permissions
      */
-    public function attachPermission($permissions)
+    public function attachPermissions($permissions)
     {
         $this->permissions()->attach($permissions);
+        app('events')->fire('permissions.attached', $this);
     }
 
     /**
-     * @param $permissions
+     * Remove permissions from roles
+     *
+     * @param string|array $permissions
+     * @return int
      */
-    public function detachPermission($permissions = [])
+    public function detachPermissions($permissions = [])
     {
-        $this->permissions()->detach($permissions);
+        $res = $this->permissions()->detach($permissions);
+        app('events')->fire('permissions.detached', $this);
+
+        return $res;
     }
 
     /**
@@ -29,7 +36,22 @@ trait RoleAuthorizationTrait
      */
     public function permissions()
     {
-        return $this->belongsToMany(app('config')->get('authorization.model_permission'));
+        return $this->belongsToMany(app('config')->get('authorization.model.permission'));
+    }
+
+    /**
+     * Sync permissions of roles
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection|array $permissions
+     *
+     * @return array
+     */
+    public function syncPermissions($permissions)
+    {
+        $res = $this->permissions()->sync($permissions);
+        app('events')->fire('permissions.synced', $this);
+
+        return $res;
     }
 
     /**
@@ -39,6 +61,6 @@ trait RoleAuthorizationTrait
      */
     public function users()
     {
-        return $this->belongsToMany(app('config')->get('authorization.model_user'));
+        return $this->belongsToMany(app('config')->get('authorization.model.user'));
     }
 }
