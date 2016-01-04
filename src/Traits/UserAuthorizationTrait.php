@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 
 trait UserAuthorizationTrait
 {
+    use GetListKeyObject;
     /**
      * The permissions of user.
      *
@@ -35,7 +36,7 @@ trait UserAuthorizationTrait
      */
     public function attachRole($roles)
     {
-        $this->roles()->attach($roles);
+        $this->roles()->attach($this->getListKey($roles));
     }
 
     /**
@@ -117,7 +118,7 @@ trait UserAuthorizationTrait
      */
     public function detachRole($roles = [])
     {
-        return $this->roles()->detach($roles);
+        return $this->roles()->detach($this->getListKey($roles));
     }
 
     /**
@@ -246,4 +247,17 @@ trait UserAuthorizationTrait
         return $this->belongsToMany(app('config')->get('authorization.model_role'));
     }
 
+    /**
+     * Sync roles of user
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection|array $roles
+     *
+     * @return array
+     */
+    public function syncRoles($roles)
+    {
+        $res = $this->roles()->sync($this->getListKey($roles));
+
+        return $res;
+    }
 }
