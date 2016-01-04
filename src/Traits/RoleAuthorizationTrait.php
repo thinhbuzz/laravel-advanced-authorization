@@ -4,14 +4,18 @@
 namespace Buzz\Authorization\Traits;
 
 
+use Illuminate\Database\Eloquent\Model;
+
 trait RoleAuthorizationTrait
 {
+    use GetListKeyObject;
     /**
      * @param $permissions
      */
     public function attachPermissions($permissions)
     {
-        $this->permissions()->attach($permissions);
+
+        $this->permissions()->attach($this->getListKey($permissions));
         app('events')->fire('permissions.attached', $this);
     }
 
@@ -23,7 +27,7 @@ trait RoleAuthorizationTrait
      */
     public function detachPermissions($permissions = [])
     {
-        $res = $this->permissions()->detach($permissions);
+        $res = $this->permissions()->detach($this->getListKey($permissions));
         app('events')->fire('permissions.detached', $this);
 
         return $res;
@@ -48,7 +52,7 @@ trait RoleAuthorizationTrait
      */
     public function syncPermissions($permissions)
     {
-        $res = $this->permissions()->sync($permissions);
+        $res = $this->permissions()->sync($this->getListKey($permissions));
         app('events')->fire('permissions.synced', $this);
 
         return $res;

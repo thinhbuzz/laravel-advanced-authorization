@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 
 trait UserAuthorizationTrait
 {
+    use GetListKeyObject;
     /**
      * The permissions of user.
      *
@@ -41,7 +42,7 @@ trait UserAuthorizationTrait
      */
     public function attachRoles($roles)
     {
-        $this->roles()->attach($roles);
+        $this->roles()->attach($this->getListKey($roles));
         app('events')->fire('roles.attached', $this);
     }
 
@@ -124,7 +125,7 @@ trait UserAuthorizationTrait
      */
     public function detachRoles($roles = [])
     {
-        $res = $this->roles()->detach($roles);
+        $res = $this->roles()->detach($this->getListKey($roles));
         app('events')->fire('roles.detached', $this);
 
         return $res;
@@ -254,7 +255,7 @@ trait UserAuthorizationTrait
      */
     public function syncRoles($roles)
     {
-        $res = $this->roles()->sync($roles);
+        $res = $this->roles()->sync($this->getListKey($roles));
         app('events')->fire('roles.synced', $this);
 
         return $res;
