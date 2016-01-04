@@ -45,25 +45,37 @@ trait UserAuthorizationTrait
      * @param bool $any
      * @return bool
      */
-    public function can($permission, $any = false)
+    public function can($permission, $any = false, $prefix = false)
     {
         $this->loadPermissions();
         if ($permission instanceof Model) {
             $permission = $permission->slug;
         }
+        if ($prefix)
+            $allSlug = $this->slugPermissions->toArray();
         if (is_array($permission)) {
-            foreach ($permission as $item) {
-                if ($this->slugPermissions->search($item) === false) {
-                    return false;
-                } elseif ($any === true) {
-                    return true;
+            if ($prefix) {
+                foreach ($permission as $item) {
+                    if ($this->checkCanWithPrefix($allSlug, $item) === true) {
+                        return true;
+                    }
                 }
+                return false;
+            } else {
+                foreach ($permission as $item) {
+                    if ($this->slugPermissions->search($item) === false) {
+                        return false;
+                    } elseif ($any === true) {
+                        return true;
+                    }
+                }
+                return true;
             }
-
-            return true;
         }
-
-        return $this->slugPermissions->search($permission) !== false;
+        if ($prefix)
+            return $this->checkCanWithPrefix($allSlug, $permission) !== false;
+        else
+            return $this->slugPermissions->search($permission) !== false;
     }
 
     /**
@@ -75,6 +87,26 @@ trait UserAuthorizationTrait
     public function canAny($permissions)
     {
         return $this->can($permissions, true);
+    }
+
+    /**
+     * Return true if user has one in any permissions start with permission input
+     *
+     * @param string|array $permission
+     * @return bool
+     */
+    public function canWithPrefix($permissions)
+    {
+        return $this->can($permissions, false, true);
+    }
+
+    protected function checkCanWithPrefix($allSlug, $permission)
+    {
+        foreach ($allSlug as $slug) {
+            if (strpos($slug, $permission) === 0)
+                return true;
+        }
+        return false;
     }
 
     /**
