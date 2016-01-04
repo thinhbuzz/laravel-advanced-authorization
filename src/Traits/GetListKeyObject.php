@@ -19,6 +19,8 @@ trait GetListKeyObject
             } else {
                 $ids = $objects;
             }
+        } else {
+            $ids = [$objects];
         }
         return $ids;
     }
