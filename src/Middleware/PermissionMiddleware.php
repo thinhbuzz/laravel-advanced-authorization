@@ -4,8 +4,8 @@
 namespace Buzz\Authorization\Middleware;
 
 use Closure;
-use Illuminate\Auth\Guard;
 use Illuminate\Config\Repository;
+use Illuminate\Contracts\Auth\Guard;
 
 class PermissionMiddleware
 {
@@ -35,11 +35,12 @@ class PermissionMiddleware
      *
      * @param  \Illuminate\Http\Request $request
      * @param  \Closure $next
+     * @param $permission
      * @return mixed
      */
     public function handle($request, Closure $next, $permission)
     {
-        $permissionException = $this->config->get('authorization.permission_exception');
+        $permissionException = $this->config->get('authorization.exception.permission_denied');
         if (strpos($permission, '|') !== false) {
             $method = 'canAny';
             $permissions = explode('|', $permission);
@@ -48,10 +49,10 @@ class PermissionMiddleware
             $permissions = explode('&', $permission);
         } else {
             $method = 'can';
-            $permissions = $permission;
+            $permissions = [$permission];
         }
         if (app('authorization')->{$method}($permissions) === false) {
-            throw new $permissionException();
+            throw new $permissionException($permissions);
         }
 
         return $next($request);

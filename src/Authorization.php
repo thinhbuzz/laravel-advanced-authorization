@@ -1,18 +1,18 @@
 <?php
 
-
 namespace Buzz\Authorization;
 
-
+use App\User;
 use Illuminate\Foundation\Application;
 
-/* *
- * @method boolean can($permission)
- * @method boolean canAny($permission)
- * @method boolean is($role)
- * @method boolean isAny($role)
- * */
-
+/**
+ * Class Authorization
+ * @package Buzz\Authorization
+ * @method boolean can($permissions)
+ * @method boolean canAny($permissions)
+ * @method boolean cantAny($permissions)
+ * @method boolean cantNotAny($permissions)
+ */
 class Authorization
 {
     /**
@@ -23,6 +23,9 @@ class Authorization
      * @var boolean
      */
     protected $isLogin;
+    /**
+     * @var User
+     */
     protected $user;
 
     public function __construct(Application $app)
@@ -32,8 +35,6 @@ class Authorization
         if ($app['auth']->check() === true) {
             $this->isLogin = true;
             $this->user = $app['auth']->user();
-        } else {
-            $this->isLogin = false;
         }
     }
 
@@ -57,10 +58,14 @@ class Authorization
         return call_user_func_array([$this, $name], $arguments);
     }
 
+    /**
+     * @return \App\User|null
+     */
     public function user()
     {
         if ($this->isLogin === true) {
             return $this->user;
         }
+        return null;
     }
 }

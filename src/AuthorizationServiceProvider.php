@@ -3,6 +3,9 @@
 
 namespace Buzz\Authorization;
 
+use Buzz\Authorization\Events\RebuildPermissionRoleEvent;
+use Buzz\Authorization\Listeners\RebuildPermissionRoleListener;
+use Buzz\Authorization\Middleware\PermissionMiddleware;
 use Illuminate\Support\ServiceProvider;
 
 class AuthorizationServiceProvider extends ServiceProvider
@@ -22,9 +25,15 @@ class AuthorizationServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'authorization');
-        $this->registerAlias();
+        $this->mergeConfigFrom(__DIR__ . '/../config.php', 'authorization');
         $this->registerBladeShortcut();
+        $this->registerRebuildRoleEvent();
+        $this->registerMiddleware();/*publish migration and config*/
+        $this->publishes([
+            __DIR__ . '/../migrations/' => base_path('/database/migrations'),
+            __DIR__ . '/Models/' => app_path('/Models'),
+            __DIR__ . '/../config.php' => config_path('authorization.php')
+        ]);
     }
 
     /**
@@ -49,84 +58,65 @@ class AuthorizationServiceProvider extends ServiceProvider
         return ['authorization'];
     }
 
-    protected function registerAlias()
-    {
-        $config = $this->app->config->get('authorization');
-        if ($config['auto_alias'] === true) {
-            \Illuminate\Foundation\AliasLoader::getInstance()->alias($config['alias'], AuthorizationFacade::class);
-        }
-    }
-
+    /**
+     * Register blade short cut
+     *
+     * @return void
+     */
     protected function registerBladeShortcut()
     {
-        $config = $this->app->config->get('authorization');
+        /**
+         * @var \Illuminate\Config\Repository $appConfig
+         */
+        $appConfig = $this->app['config'];
+        $config = $appConfig->get('authorization');
         if ($config['blade_shortcut'] === true) {
-            $blade = $this->app['view']->getEngineResolver()->resolve('blade')->getCompiler();
+            /**
+             * @var \Illuminate\View\Factory $view
+             */
+            $view = $this->app['view'];
+            /**
+             * @var \Illuminate\View\Engines\CompilerEngine $engine
+             */
+            $engine = $view->getEngineResolver()->resolve('blade');
+            /**
+             * @var \Illuminate\View\Compilers\BladeCompiler $bladeCompiler
+             */
+            $bladeCompiler = $engine->getCompiler();
             /*
              * Blade shortcut fot authorization
              * */
-            $blade->directive('role', function ($expression) {
-                return "<?php if(app('authorization')->is{$expression}): ?>";
-            });
-            $blade->directive('anyRole', function ($expression) {
-                return "<?php if(app('authorization')->isAny{$expression}): ?>";
-            });
-            $blade->directive('permission', function ($expression) {
+            $bladeCompiler->directive('permission', function ($expression) {
                 return "<?php if(app('authorization')->can{$expression}): ?>";
             });
-            $blade->directive('anyPermission', function ($expression) {
+            $bladeCompiler->directive('anyPermission', function ($expression) {
                 return "<?php if(app('authorization')->canAny{$expression}): ?>";
             });
 
-            $blade->directive('endRole', function ($expression) {
+            $bladeCompiler->directive('endPermission', function () {
                 return "<?php endif; ?>";
             });
-            $blade->directive('endAnyRole', function ($expression) {
+            $bladeCompiler->directive('endAnyPermission', function () {
                 return "<?php endif; ?>";
             });
-            $blade->directive('endPermission', function ($expression) {
-                return "<?php endif; ?>";
-            });
-            $blade->directive('endAnyPermission', function ($expression) {
-                return "<?php endif; ?>";
-            });
-            /*
-             * Blade shortcut for user level
-             * */
-            if ($config['user_level'] === true) {
-                $blade->directive('greaterLevel', function ($expression) {
-                    return "<?php if(app('authorization')->level() > {$expression}): ?>";
-                });
-                $blade->directive('lessLevel', function ($expression) {
-                    return "<?php if(app('authorization')->level() < {$expression}): ?>";
-                });
-                $blade->directive('betweenLevel', function ($expression) {
-                    list($min, $max) = explode(',', str_replace(['(', ')', ' '], '', $expression));
-
-                    return "<?php if(app('authorization')->level() >= {$min} && app('authorization')->level() <= {$max}): ?>";
-                });
-                $blade->directive('matchLevel', function ($expression) {
-                    return "<?php if(app('authorization')->matchLevel{$expression}): ?>";
-                });
-                $blade->directive('matchAnyLevel', function ($expression) {
-                    return "<?php if(app('authorization')->matchAnyLevel{$expression}): ?>";
-                });
-                $blade->directive('endGreaterLevel', function ($expression) {
-                    return "<?php endif; ?>";
-                });
-                $blade->directive('endLessLevel', function ($expression) {
-                    return "<?php endif; ?>";
-                });
-                $blade->directive('endBetweenLevel', function ($expression) {
-                    return "<?php endif; ?>";
-                });
-                $blade->directive('endMatchLevel', function ($expression) {
-                    return "<?php endif; ?>";
-                });
-                $blade->directive('endMatchAnyLevel', function ($expression) {
-                    return "<?php endif; ?>";
-                });
-            }
         }
+    }
+
+    protected function registerRebuildRoleEvent()
+    {
+        /**
+         * @var \Illuminate\Contracts\Events\Dispatcher $events
+         */
+        $events = $this->app['events'];
+        $events->listen(RebuildPermissionRoleEvent::class, RebuildPermissionRoleListener::class);
+    }
+
+    protected function registerMiddleware()
+    {
+        /**
+         * @var \Illuminate\Routing\Router $router
+         */
+        $router = $this->app['router'];
+        $router->aliasMiddleware('permission', PermissionMiddleware::class);
     }
 }
