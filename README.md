@@ -1,11 +1,8 @@
-# Advanced authorization in Laravel 5.*
-
-> This package inspired by [zizaco/entrust](https://github.com/Zizaco/entrust) and [bican/roles](https://github.com/romanbican/roles).
+# Advanced authorization in Laravel >= 5.5
+> development mode
 
 - [Installation](#installation)
     - [Composer](#composer)
-    - [Provider](#provider)
-    - [Alias](#alias)
     - [Middleware](#middleware)
 - [Configuration](#configuration)
     - [Pubslish](#pubslish)
@@ -23,161 +20,73 @@
 Run command:
   
 ```
-composer require buzz/laravel-advanced-authorization 1.*
+composer require buzz/laravel-advanced-authorization 3.*
 ```
     
 Or open composer.json, insert into bellow code and run command ``composer update`` 
     
 ```
-"buzz/laravel-advanced-authorization": "1.*",
-``` 
-
-### Provider
-
-Insert two providers to ``providers`` (``config/app.php``)
-
-```php
-\Buzz\Authorization\AuthorizationServiceProvider::class,
-\Buzz\Authorization\UtilitieServiceProvider::class,
+"buzz/laravel-advanced-authorization": "3.*",
 ```
-``UtilitieServiceProvider`` not required, this provider only help you publish models and seed of package by using the command. After publish you can remove it.
-
-### Alias
-
-By default, the package will automatically add ``Authorization`` to ``aliases``, you can edit in the config of the package.
 
 ### Middleware
 
-Open ``app/Http/Kernel.php`` and insert into bellow code to routeMiddleware:
-
-```php
-'role' => \Buzz\Authorization\Middleware\RoleMiddleware::class,
-'permission' => \Buzz\Authorization\Middleware\PermissionMiddleware::class,
-'level' => \Buzz\Authorization\Middleware\LevelMiddleware::class,
-```
+Package already register middleware ``permission``
 
 ## Configuration
-- So publish config, migration you can run command
+- So publish config, migrations, models you can run command
 
 ```
-php artisan vendor:publish
+php artisan vendor:publish --provider="Buzz\Authorization\AuthorizationServiceProvider"
 ```
 
 And after that run command: ``php artisan migrate`` (maybe you want edit migration file before run this command)
 
-### Config package
-
-```php
-/*
- * Class name of models
- *
- * */
-'model_role' => \App\Role::class,
-'model_permission' => \App\Permission::class,
-'model_user' => \App\User::class,
-/*
- * Auto add Authorization to alias, if you want change or disable you can change in here.
- * This is equivalent to insert the following code to to aliases
- * 'Authorization' => \Buzz\Authorization\AuthorizationFacade::class,
- *
- * */
-'auto_alias' => true,
-'alias' => 'Authorization',
-/*
- * Add blade shortcut: @permission, @role, @anyRole, ...
- *
- * */
-'blade_shortcut' => true,
-/*
- * If you do not want to use the role level, you can switch to false and remove field level in migration.
- * */
-'user_level' => true,
-/*
- * Exception class name is used in middleware
- * */
-'role_exception' => \Buzz\Authorization\Exception\RoleDeniedException::class,
-'permission_exception' => \Buzz\Authorization\Exception\PermissionDeniedException::class,
-/*
- * level_exception will be required if option user_level is true and you use level middleware
- * */
-'level_exception' => \Buzz\Authorization\Exception\LevelDeniedException::class
-```
-
-### Config model
-
-So publish seed, model you can run command: ``php artisan authorization:seeder`` and ``php artisan authorization:model``.
-To perform these commands, ``UtilitieServiceProvider`` added to ``providers`` (``config/app.php``) is required
-
-##### Permission and Role models
-Two models will appear after run command published successfully. You can edit, custom any thing you want, but not remove default trait available.
-
-Example:
-
-```php
-// Permission.php
-namespace App;
-
-use Buzz\Authorization\Traits\PermissionAuthorizationTrait;
-use Illuminate\Database\Eloquent\Model;
-
-class Permission extends Model
-{
-    use PermissionAuthorizationTrait;
-    public $table = 'permissions';
-}
-
-//Role.php
-namespace App;
-
-use Buzz\Authorization\Interfaces\RoleInterface;
-use Buzz\Authorization\Traits\RoleAuthorizationTrait;
-use Illuminate\Database\Eloquent\Model;
-
-class Role extends Model implements RoleInterface
-{
-    use RoleAuthorizationTrait;
-    public $table = 'roles';
-}
-```
-
 ##### User model
-You need to remove trait ``Authorizable`` and contract ``AuthorizableContract`` (default of laravel). And after that, use two trait of the package, implements two interface ``UserAuthorizationInterface``, ``UserLevelInterface``
-```php
-Buzz\Authorization\Traits\UserAuthorizationTrait;
-Buzz\Authorization\Traits\UserLevelTrait; //only add when you use role level
-```
+You need to remove trait ``Authorizable`` and contract ``AuthorizableContract`` (default of laravel).
 
-Example:
+
 ```php
+<?php
+
 namespace App;
 
-use Buzz\Authorization\Interfaces\UserAuthorizationInterface;
-use Buzz\Authorization\Interfaces\UserLevelInterface;
-use Buzz\Authorization\Traits\UserAuthorizationTrait;
-use Buzz\Authorization\Traits\UserLevelTrait;
+use Buzz\Authorization\Traits\PermissionForUserTrait;
+use Buzz\Authorization\Traits\RoleForUserTrait;
 use Illuminate\Auth\Authenticatable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
-class User extends Model implements AuthenticatableContract,
-    CanResetPasswordContract, UserAuthorizationInterface, UserLevelInterface
+class User extends Model implements AuthenticatableContract, CanResetPasswordContract
 {
-    use Authenticatable, CanResetPassword, UserAuthorizationTrait, UserLevelTrait;
+    use Notifiable, Authenticatable, CanResetPassword, RoleForUserTrait, PermissionForUserTrait;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name', 'email', 'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
 }
 ```
 
+
 ## Instruction
 ### Creating data
-##### Create Permission
-
-```php
-$permission = new \App\Permission();//depend "model_permission" config 
-$permission->name = 'Create posts';
-$permission->slug = 'post.create';// can use str_slug('Create posts', '.');
-$permission->save();
-```
 
 ##### Create Role
 
