@@ -1,9 +1,22 @@
 <?php
-$config = [
+
+return [
     'blade_shortcut' => false,
+    'super_user_key' => 'super_user',
     'groups' => [
+        'super' => [
+            'title' => 'Super User',
+            'hidden' => true,
+            'permissions' => [
+                [
+                    'title' => 'Super User',
+                    'key' => 'super_user'
+                ]
+            ]
+        ],
         'authorization' => [
             'title' => 'Authorization management',
+            'hidden' => false,
             'permissions' => [
                 [
                     'title' => 'Create role',
@@ -25,11 +38,3 @@ $config = [
     ],
     'groupKeys' => []
 ];
-
-$config['groupKeys'] = array_map(function ($group) {
-    return array_map(function ($permission) {
-        return $permission['key'];
-    }, $group['permissions']);
-}, $config['groups']);
-
-return $config;
