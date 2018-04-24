@@ -1,6 +1,12 @@
 # Advanced authorization in Laravel >= 5.5
 > development mode
 
+## Check list
+
+- [ ] Cache
+- [x] Super user
+- [ ] ...
+
 - [Installation](#installation)
     - [Composer](#composer)
     - [Middleware](#middleware)
