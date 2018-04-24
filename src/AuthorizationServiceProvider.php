@@ -26,14 +26,12 @@ class AuthorizationServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->mergeConfigFrom(__DIR__ . '/../config.php', 'authorization');
+        $this->generateGroupKeys();
         $this->registerBladeShortcut();
         $this->registerRebuildRoleEvent();
-        $this->registerMiddleware();/*publish migration and config*/
-        $this->publishes([
-            __DIR__ . '/../migrations/' => base_path('/database/migrations'),
-            __DIR__ . '/Models/' => app_path('/Models'),
-            __DIR__ . '/../config.php' => config_path('authorization.php')
-        ]);
+        $this->registerMiddleware();
+        /*publish migration and config*/
+        $this->publishable();
     }
 
     /**
@@ -118,5 +116,35 @@ class AuthorizationServiceProvider extends ServiceProvider
          */
         $router = $this->app['router'];
         $router->aliasMiddleware('permission', PermissionMiddleware::class);
+    }
+
+    protected function publishable()
+    {
+        $this->publishes([
+            __DIR__ . '/../migrations/' => base_path('/database/migrations'),
+            __DIR__ . '/Models/' => app_path('/Models'),
+            __DIR__ . '/../config.php' => config_path('authorization.php')
+        ]);
+        if ($this->app->environment() === 'testing') {
+            $this->loadMigrationsFrom(__DIR__.'/../migrations');
+        }
+    }
+
+    /**
+     * Create group key
+     */
+    protected function generateGroupKeys()
+    {
+        /**
+         * @var \Illuminate\Config\Repository $config
+         */
+        $config = $this->app['config'];
+        $authorization = $config->get('authorization');
+        $authorization['groupKeys'] = array_map(function ($group) {
+            return array_map(function ($permission) {
+                return $permission['key'];
+            }, $group['permissions']);
+        }, $authorization['groups']);
+        $config->set('authorization', $authorization);
     }
 }
